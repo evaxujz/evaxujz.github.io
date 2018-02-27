@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="PowerMock," />
 
 
 
@@ -79,17 +79,18 @@
 
 
 
-<meta name="description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick">
+<meta name="description" content="PowerMock的一些使用总结 1.Mock的作用 在做单元测试的时候,我们会发现我们要测试的方法会引用很多外部依赖的对象,比如:(发送邮件,网络通讯,远程服务,文件系统等等).而我们没法控制这些外部依赖的对象，为了解决这个问题，我们就需要用到Mock工具来模拟这些外部依赖的对象，来完成单元测试.  2.PowerMock的优点 现如今比较流行的Mock工具如jMock、EasyMock、Moc">
+<meta name="keywords" content="PowerMock">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Hello World">
-<meta property="og:url" content="http://yoursite.com/2018/02/08/hello-world/index.html">
+<meta property="og:title" content="PowerMock使用总结">
+<meta property="og:url" content="http://yoursite.com/2018/02/27/PowerMock Summary/index.html">
 <meta property="og:site_name" content="evanxu.blog">
-<meta property="og:description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick">
+<meta property="og:description" content="PowerMock的一些使用总结 1.Mock的作用 在做单元测试的时候,我们会发现我们要测试的方法会引用很多外部依赖的对象,比如:(发送邮件,网络通讯,远程服务,文件系统等等).而我们没法控制这些外部依赖的对象，为了解决这个问题，我们就需要用到Mock工具来模拟这些外部依赖的对象，来完成单元测试.  2.PowerMock的优点 现如今比较流行的Mock工具如jMock、EasyMock、Moc">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2018-02-08T14:36:11.783Z">
+<meta property="og:updated_time" content="2018-02-27T13:45:11.418Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hello World">
-<meta name="twitter:description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick">
+<meta name="twitter:title" content="PowerMock使用总结">
+<meta name="twitter:description" content="PowerMock的一些使用总结 1.Mock的作用 在做单元测试的时候,我们会发现我们要测试的方法会引用很多外部依赖的对象,比如:(发送邮件,网络通讯,远程服务,文件系统等等).而我们没法控制这些外部依赖的对象，为了解决这个问题，我们就需要用到Mock工具来模拟这些外部依赖的对象，来完成单元测试.  2.PowerMock的优点 现如今比较流行的Mock工具如jMock、EasyMock、Moc">
 
 
 
@@ -119,13 +120,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2018/02/08/hello-world/"/>
+  <link rel="canonical" href="http://yoursite.com/2018/02/27/PowerMock Summary/"/>
 
 
 
 
 
-  <title>Hello World | evanxu.blog</title>
+  <title>PowerMock使用总结 | evanxu.blog</title>
   
 
 
@@ -262,7 +263,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/02/08/hello-world/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/02/27/PowerMock Summary/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Evan Xu">
@@ -279,7 +280,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Hello World</h1>
+          <h1 class="post-title" itemprop="name headline">PowerMock使用总结</h1>
         
 
         <div class="post-meta">
@@ -291,8 +292,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-02-08T21:45:45+08:00">
-                2018-02-08
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-02-27T21:20:00+08:00">
+                2018-02-27
               </time>
             
 
@@ -301,6 +302,28 @@
             
           </span>
 
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Note/" itemprop="url" rel="index">
+                    <span itemprop="name">Note</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
           
 
           
@@ -329,15 +352,66 @@
       
 
       
-        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>
+        <p>PowerMock的一些使用总结</p>
+<h2 id="1-Mock的作用"><a href="#1-Mock的作用" class="headerlink" title="1.Mock的作用"></a>1.Mock的作用</h2><blockquote>
+<p>在做单元测试的时候,我们会发现我们要测试的方法会引用很多外部依赖的对象,比如:(发送邮件,网络通讯,远程服务,文件系统等等).而我们没法控制这些外部依赖的对象，为了解决这个问题，我们就需要用到Mock工具来模拟这些外部依赖的对象，来完成单元测试.</p>
+</blockquote>
+<h2 id="2-PowerMock的优点"><a href="#2-PowerMock的优点" class="headerlink" title="2.PowerMock的优点"></a>2.PowerMock的优点</h2><blockquote>
+<p>现如今比较流行的Mock工具如jMock、EasyMock、Mockito等都有一个共同的缺点:不能mock静态、final、私有方法等.而PowerMock能够完美的弥补以上三个Mock工具的不足.</p>
+</blockquote>
+<h2 id="3-PowerMock涉及到的相关概念"><a href="#3-PowerMock涉及到的相关概念" class="headerlink" title="3.PowerMock涉及到的相关概念"></a>3.PowerMock涉及到的相关概念</h2><ul>
+<li>检测:单元测试的目的是检验代码是够按照预期运行,一般来说,有两种验证方式.<ol>
+<li>状态监测: 通过检测方法的状态判断方法是否运行成功(判断方法的返回结果是够符合预期).</li>
+<li>行为检测: 通过检测方法的执行行为判断方法是否运行成功(判断方法是否成功被调用).</li>
+</ol>
+</li>
+<li>替换对象: 在使用mock方法模拟对象时会使用到不同的替换对象.<ol>
+<li>桩(stub): 模拟一个Object,不执行真正逻辑,直接返回指定值,多用于状态监测.</li>
+<li>模拟对象(mock): 模拟一个Object,但不关心返回值,更关心对象的期望行为,只关心特定方法是否被使用,多用于行为检测,可用于验证返回void的场景.</li>
+</ol>
+</li>
+<li>部分Mock: 对于某些测试,只希望模拟对象的部分方法,保留部分真实方法,此时有两种选择.<ol>
+<li>创建mock对象,对需要执行真实逻辑的方法调用do(then)CallRealMethod()执行真实方法.</li>
+<li>使用spy函数创建监视对象,对需要执行mock的方法进行指定,默认会运行真实的逻辑代码.</li>
+</ol>
+</li>
+</ul>
+<h2 id="4-PowerMock使用总结"><a href="#4-PowerMock使用总结" class="headerlink" title="4.PowerMock使用总结"></a>4.PowerMock使用总结</h2><ol>
+<li><p>测试类开头需要添加注解:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//要使用PowerMock功能需要添加此注解 </span></span><br><span class="line"><span class="meta">@RunWith</span>(PowerMockRunner.class)  </span><br><span class="line"><span class="comment">//若需要mock某类的静态,final,私有方法等需要将类加入此注解</span></span><br><span class="line"><span class="meta">@PrepareForTest</span>(&#123;class1.Class, class2.Class, …&#125;)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Spy的使用:<br>若使用spy(Class)根据类来创建spy对象,则该类中的方法在不指定mock行为时均执行真实方法,该方法跟mockStatic()的差别是: mockStatic会将所有类中的静态方法mock,而spy方法则只会对指定了mock行为的方法进行mock.<br>若使用spy(Object)根据一个实例来创建对象,则spy对象相当于是该实例的一个浅拷贝对象,对于基本类型会拷贝实例的值,对于引用类型则会直接拷贝其引用.  </p>
+</li>
+<li>测试方法的单一职责<br>对于LLT的编写,应该尽量保证一个测试方法只测试一个待测方法,应避免一个测试方法覆盖多个待测方法,这样会导致后期修改业务代码后对LLT的维护难度增大,业务代码中的多处改动都可能导致该测试方法的执行失败,使得对于LLT的修改变得频繁.</li>
+<li>合理分配测试类的初始化工作<br>JUnit通过@BeforeClass, @Before, @After, @AfterClass等注解来控制单元测试的生命周期,而其中的@Before, @BeforeClass与构造器都可以用来对测试方法需要用到的对象属性做初始化工作,可以通过将不同的属性初始化放在不同的生命周期内,使得属性的初始化与待测类的初始化在逻辑上保持一致性.</li>
+<li>do..when 与 when..then的区别<br>采用do..when的mock方式,在执行被mock的方法时不会执行真正的代码逻辑,而when..then在执行mock方法时会执行真正的代码逻辑.</li>
+<li>whenNew的使用<br>当需要使用whenNew来mock一个新实例时需要将使用到new语句的类写入到@PrepareForTest注解中,一般用到new的是待测类.</li>
+<li><p>doAnswer的使用<br>doAnswer().when()一般配合使用,当满足条件时执行对应的Answer的answer方法,如果answer()抛出异常,那么测试不通过<br>使用doAnswer()需要传入一个实现了Answer<t>接口的类实例:</t></p>
+<pre><code class="java"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CustomAnswer</span> <span class="keyword">implements</span> <span class="title">Answer</span>&lt;<span class="title">String</span>&gt; </span>{  
+<span class="function"><span class="keyword">public</span> String <span class="title">answer</span><span class="params">(InvocationOnMock invocation)</span> <span class="keyword">throws</span> Throwable </span>{  
+    Object[] args = invocation.getArguments();  
+    Integer num = (Integer)args[<span class="number">0</span>];  
+    <span class="keyword">if</span>( num &gt; <span class="number">3</span> ){  
+        <span class="keyword">return</span> <span class="string">"yes"</span>;  
+    } <span class="keyword">else</span> {  
+        <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException();  
+    }  
+ }  
+
+ <span class="meta">@Test</span>  
+ <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">customAnswerTest</span><span class="params">()</span></span>{  
+     List&lt;String&gt; mock = mock(List.class);  
+     Mockito.doAnswer(<span class="keyword">new</span> CustomAnswer()).when(mock).get(anyInt());  
+     mock.get(<span class="number">4</span>);   
+     mock.get(<span class="number">2</span>);          
+ }   
+}
+</code></pre>
+</li>
+</ol>
+<h2 id="5-常见错误总结"><a href="#5-常见错误总结" class="headerlink" title="5.常见错误总结"></a>5.常见错误总结</h2><ol>
+<li>ExceptionInitializerError<br>可能原因: 测试涉及到的类初始化失败<br>解决方法: 查看相应的涉及到的类,对于mock无法成功处理的初始化可以手动构建或者在@SuppressStaticInitializationFor注解中抑制初始化过程.</li>
+</ol>
 
       
     </div>
@@ -353,6 +427,12 @@
 
     <footer class="post-footer">
       
+        <div class="post-tags">
+          
+            <a href="/tags/PowerMock/" rel="tag"># PowerMock</a>
+          
+        </div>
+      
 
       
       
@@ -362,15 +442,15 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
+              <a href="/2018/02/08/A-Note-About-HTTPS-Protocol/" rel="next" title="HTTPS协议详解">
+                <i class="fa fa-chevron-left"></i> HTTPS协议详解
+              </a>
+            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/02/08/A-Note-About-HTTPS-Protocol/" rel="prev" title="HTTPS协议详解">
-                HTTPS协议详解 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -502,7 +582,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Quick-Start"><span class="nav-number">1.</span> <span class="nav-text">Quick Start</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Create-a-new-post"><span class="nav-number">1.1.</span> <span class="nav-text">Create a new post</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Run-server"><span class="nav-number">1.2.</span> <span class="nav-text">Run server</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Generate-static-files"><span class="nav-number">1.3.</span> <span class="nav-text">Generate static files</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Deploy-to-remote-sites"><span class="nav-number">1.4.</span> <span class="nav-text">Deploy to remote sites</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-Mock的作用"><span class="nav-number">1.</span> <span class="nav-text">1.Mock的作用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-PowerMock的优点"><span class="nav-number">2.</span> <span class="nav-text">2.PowerMock的优点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-PowerMock涉及到的相关概念"><span class="nav-number">3.</span> <span class="nav-text">3.PowerMock涉及到的相关概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-PowerMock使用总结"><span class="nav-number">4.</span> <span class="nav-text">4.PowerMock使用总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-常见错误总结"><span class="nav-number">5.</span> <span class="nav-text">5.常见错误总结</span></a></li></ol></div>
             
 
           </div>

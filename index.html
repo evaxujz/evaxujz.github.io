@@ -259,6 +259,156 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/02/27/PowerMock Summary/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Evan Xu">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="evanxu.blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/02/27/PowerMock Summary/" itemprop="url">PowerMock使用总结</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-02-27T21:20:00+08:00">
+                2018-02-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Note/" itemprop="url" rel="index">
+                    <span itemprop="name">Note</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+          PowerMock的一些使用总结
+1.Mock的作用
+在做单元测试的时候,我们会发现我们要测试的方法会引用很多外部依赖的对象,比如:(发送邮件,网络通讯,远程服务,文件系统等等).而我们没法控制这些外部依赖的对象，为了解决这个问题，我们就需要用到Mock工具来模拟这些外部依赖的对象，来完成单元测试.
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/02/27/PowerMock Summary/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/02/08/A-Note-About-HTTPS-Protocol/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -352,104 +502,17 @@
       
         
           
-            <p>关于HTTPS协议的一点笔记.</p>
-<h2 id="1-HTTPS相关概念"><a href="#1-HTTPS相关概念" class="headerlink" title="1.HTTPS相关概念"></a>1.HTTPS相关概念</h2><h4 id="1-1-HTTP协议"><a href="#1-1-HTTP协议" class="headerlink" title="1.1 HTTP协议"></a>1.1 HTTP协议</h4><blockquote>
-<p>超文本传输协议(HTTP,HyperText Transfer Protocol)是互联网上应用最为广泛的一种网络协议,所有的WWW文件都必须遵守这个标准.HTTP协议传输的数据都是未加密的,也就是明文的,因此使用HTTP协议传输隐私信息非常不安全.</p>
-</blockquote>
-<h4 id="HTTPS协议"><a href="#HTTPS协议" class="headerlink" title="HTTPS协议"></a>HTTPS协议</h4><blockquote>
-<p>HTTPS(Hyper Text Transfer Protocol over Secure Socket Layer),是以安全为目标的HTTP通道,简单讲是HTTP的安全版.通过SSL协议对HTTP协议传输的数据进行加密,保证回话过程的安全性.</p>
-</blockquote>
-<h4 id="对称加密"><a href="#对称加密" class="headerlink" title="对称加密"></a>对称加密</h4><blockquote>
-<p>采用单钥密码系统的加密方法,同一个密钥可以同时用作信息的加密和解密,这种加密方法称为对称加密,也称为单密钥加密.</p>
-</blockquote>
-<h4 id="非对称加密"><a href="#非对称加密" class="headerlink" title="非对称加密"></a>非对称加密</h4><blockquote>
-<p>对称加密算法在加密和解密时使用的是同一个秘钥；而非对称加密算法需要两个密钥来进行加密和解密,这两个秘钥是公开密钥（public key,简称公钥）和私有密钥(private key,简称私钥).</p>
-</blockquote>
-<h4 id="数字签名与验证"><a href="#数字签名与验证" class="headerlink" title="数字签名与验证"></a>数字签名与验证</h4><blockquote>
-<p>数字签名技术是将摘要信息用发送者的私钥加密,与原文一起传送给接收者.接收者只有用发送者的公钥才能解密被加密的摘要信息,然后对原文进行HASH产生一个摘要信息,与解密的摘要信息对比.如果相同,则说明收到的信息是完整的,在传输过程中没有被修改,否则说明信息被修改过,因此数字签名能够验证信息的完整性.</p>
-<blockquote>
-<p>数字签名:摘要信息私钥加密<br>签名验证:公钥解密,原文哈希后摘要信息与解密后摘要信息进行一致性比对<br>摘要信息:原文哈希后的数据,确保原文没有经过改动(防篡改)<br>私钥加密摘要信息:确保摘要信息没有被改动(防伪造)</p>
-</blockquote>
-</blockquote>
-<h4 id="数字证书"><a href="#数字证书" class="headerlink" title="数字证书"></a>数字证书</h4><blockquote>
-<p>数字证书是一个经证书授权中心数字签名的包含公开密钥拥有者信息以及公开密钥的文件.</p>
-<blockquote>
-<p><strong>证书内容</strong>:<br>证书拥有者的基本信息<br>证书拥有者公钥<br>数字签名[encrypt(HASH(证书信息), 认证中心private_key)]</p>
-</blockquote>
-</blockquote>
-<h4 id="证书授权中心"><a href="#证书授权中心" class="headerlink" title="证书授权中心"></a>证书授权中心</h4><blockquote>
-<p>CA中心又称CA机构,承担公钥体系中公钥的合法性检验的责任,负责证书的签发与验证.</p>
-</blockquote>
-<h4 id="单向认证"><a href="#单向认证" class="headerlink" title="单向认证"></a>单向认证</h4><blockquote>
-<p>客户端单方面信任服务端,可以向服务端发送和提交任务东西.</p>
-</blockquote>
-<h4 id="双向认证"><a href="#双向认证" class="headerlink" title="双向认证"></a>双向认证</h4><blockquote>
-<p>在单向认证的基础上,服务端同时也需要验证客户端的身份,并在信任后允许客户端发送和提交信息.</p>
-</blockquote>
-<h3 id="2-HTTPS的认证过程"><a href="#2-HTTPS的认证过程" class="headerlink" title="2.HTTPS的认证过程"></a>2.HTTPS的认证过程</h3><h4 id="为什么要这样认证"><a href="#为什么要这样认证" class="headerlink" title="为什么要这样认证?"></a>为什么要这样认证?</h4><ul>
-<li>HTTP协议使用明文进行传输,数据不安全,需要对数据进行加密,首先采用对称加密算法.</li>
-<li>对称秘钥需要协商,此时协商过程在未加密环境下进行,若秘钥被截获则加密无效.</li>
-<li>采用非对称加密进行数据传输,由于秘钥不对称,所以只要确认自己的私钥不被窃取,即使公钥在未加密环境下进行传输,攻击者在获取到公钥后也无法进行解密.</li>
-<li>由于非对称加密的效率与对称加密的效率相比十分低下,若通信全部采用非对称加密进行会造成较大的时延且会加大服务器的压力.<h5 id="加密方式选择"><a href="#加密方式选择" class="headerlink" title="加密方式选择:"></a>加密方式选择:</h5><pre><code>1. 通过非对称加密进行对称秘钥的协商,确保对称秘钥的保密性  
-2. 通过对称秘钥进行通信,保证安全与效率  
-</code></pre></li>
-<li>单纯非对称加密,无法避免中间人攻击,中间人可以自己生成一对公私钥,并同时监听双方的通信.<h5 id="中间人攻击"><a href="#中间人攻击" class="headerlink" title="中间人攻击:"></a>中间人攻击:</h5><pre><code>1. 中间人截获服务端公钥,替换成自己的公钥  
-2. 客户端用中间人公钥进行消息的加密发送  
-3. 中间人截取数据并用自己的私钥解密后,重新用服务端公钥进行加密发送 (截获并伪造客户端数据)  
-4. 服务端接收到消息后用私钥解密,并将返回消息加密发送  
-5. 中间人截获数据用服务端公钥解密数据,并将数据用自己的私钥进行加密发送 (截获并伪造服务端数据)  
-6. 客户端接收到数据后用中间人公钥进行解密  
-</code></pre></li>
-<li>为了避免中间人攻击,必须对服务端的公钥进行认证.因此需要数字证书(身份证)用来证明公钥拥有者身份与公钥的正确性.而证书必须通过一个具备公信力的认证中心进行颁发,才能被大家所信任.因此产生了证书授权中心.  </li>
-<li>但是证书的传输也可能遭受攻击,所以为了确保证书的正确性必须在证书中加入数字签名.  </li>
-<li>确认证书的正确性-&gt;公钥的正确性-&gt;安全协商对称秘钥-&gt;安全的信息传输.</li>
-</ul>
-<h4 id="证书信任机制"><a href="#证书信任机制" class="headerlink" title="证书信任机制"></a>证书信任机制</h4><ul>
-<li><p>证书的信任机制采用信任链机制,而信任链的根节点则是证书授权中心,这些CA本身也有证书来证明自己的身份,这些证书则称为Root CA.CA的信用像树一样分级,高层的CA为底层的CA做信任背书,计算机会内置一些顶层的CA证书,相当于自动信任这些证书机构,由于信任链机制所以计算机也会同时信任由这些CA签发的证书.</p>
-</li>
-<li><p>对于单向认证,需要一张”Root CA”与一张”Server CA”才能够建立HTTPS连接,首先服务端需要一张证书来验证自己的身份,同时客户端需要信任签发这张”Server CA”的”Root CA”,所以客户端需要内置这个”Root CA”.浏览器一般允许用户暂时信任”Root CA”从而进行通信,并在双方通信结束后将该”Root CA”从信任列表中删除.</p>
-</li>
-<li><p>对于双向认证,在单向认证的基础上还需要客户端拥有服务端签名的证书来认证自己的身份,并在发送客户端证书的时候,使用配对生成的私钥进行签名.</p>
-</li>
-</ul>
-<h4 id="单向认证详细过程"><a href="#单向认证详细过程" class="headerlink" title="单向认证详细过程"></a>单向认证详细过程</h4><blockquote>
-<p>1.客户端向服务端发送SSL协议版本号、加密算法种类、随机数等信息.<br>2.服务端给客户端返回SSL协议版本号、加密算法种类、随机数等信息,同时也返回服务器端的证书,即公钥证书.<br>3.客户端使用服务端返回的信息验证服务器的合法性,验证通过后,将继续进行通信,否则,终止通信.  </p>
-<blockquote>
-<p>证书是否过期<br>发型服务器证书的CA是否可靠<br>返回的公钥是否能正确解开返回证书中的数字签名<br>服务器证书上的域名是否和服务器的实际域名相匹配  </p>
-</blockquote>
-<p>验证通过后,将继续进行通信,否则,终止通信.<br>4.客户端向服务端发送自己所能支持的对称加密方案,供服务器端进行选择.<br>5.服务器端在客户端提供的加密方案中选择加密程度最高的加密方式.<br>6.服务器将选择好的加密方案通过明文方式返回给客户端.<br>7.客户端接收到服务端返回的加密方式后,使用该加密方式生成产生随机码,用作通信过程中对称加密的密钥,使用服务端返回的公钥进行加密,将加密后的随机码发送至服务器.<br>8.服务器收到客户端返回的加密信息后,使用自己的私钥进行解密,获取对称加密密钥.<br>9.在接下来的会话中,服务器和客户端将会使用该密码进行对称加密,保证通信过程中信息的安全.</p>
-</blockquote>
-<h4 id="双向认证详细过程"><a href="#双向认证详细过程" class="headerlink" title="双向认证详细过程"></a>双向认证详细过程</h4><blockquote>
-<p>1.客户端向服务端发送SSL协议版本号、加密算法种类、随机数等信息.<br>2.服务端给客户端返回SSL协议版本号、加密算法种类、随机数等信息,同时也返回服务器端的证书,即公钥证书.<br>3.客户端使用服务端返回的信息验证服务器的合法性,验证通过后,将继续进行通信,否则,终止通信.  </p>
-<blockquote>
-<p>证书是否过期<br>发型服务器证书的CA是否可靠<br>返回的公钥是否能正确解开返回证书中的数字签名<br>服务器证书上的域名是否和服务器的实际域名相匹配</p>
-</blockquote>
-<p>4.服务端要求客户端发送客户端的证书,客户端会将自己的证书发送至服务端.<br>5.验证客户端的证书,通过验证后,会获得客户端的公钥.<br>6.客户端向服务端发送自己所能支持的对称加密方案,供服务器端进行选择.<br>7.服务器端在客户端提供的加密方案中选择加密程度最高的加密方式.<br>8.将加密方案通过使用之前获取到的公钥进行加密,返回给客户端.<br>9.客户端收到服务端返回的加密方案密文后,使用自己的私钥进行解密,获取具体加密方式,而后,产生该加密方式的随机码,用作加密过程中的密钥,使用之前从服务端证书中获取到的公钥进行加密后,发送给服务端.<br>10.服务端收到客户端发送的消息后,使用自己的私钥进行解密,获取对称加密的密钥,在接下来的会话中,服务器和客户端将会使用该密码进行对称加密,保证通信过程中信息的安全.</p>
-</blockquote>
-<h3 id="3-证书那些事"><a href="#3-证书那些事" class="headerlink" title="3.证书那些事"></a>3.证书那些事</h3><h4 id="SSL"><a href="#SSL" class="headerlink" title="SSL"></a>SSL</h4><p>SSL(Secure Sockets Layer 安全套接层),及其继任者传输层安全（Transport Layer Security,TLS）是为网络通信提供安全及数据完整性的一种安全协议.TLS与SSL在传输层对网络连接进行加密.</p>
-<h4 id="OpenSSL"><a href="#OpenSSL" class="headerlink" title="OpenSSL"></a>OpenSSL</h4><p>简单地说,OpenSSL是SSL的一个实现,SSL只是一种规范.理论上来说,SSL这种规范是安全的,目前的技术水平很难破解,但SSL的实现就可能有些漏洞,如著名的”心脏出血”.OpenSSL还提供了一大堆强大的工具软件.</p>
-<h4 id="证书标准"><a href="#证书标准" class="headerlink" title="证书标准"></a>证书标准</h4><p><strong>X.509</strong> - 这是一种证书标准,主要定义了证书中应该包含哪些内容.其详情可以参考RFC5280,SSL使用的就是这种证书标准.</p>
-<h4 id="编码格式"><a href="#编码格式" class="headerlink" title="编码格式"></a>编码格式</h4><p><strong>PEM</strong> - Privacy Enhanced Mail,打开看文本格式,以”—–BEGIN…”开头, “—–END…”结尾,内容是BASE64编码.<br>查看PEM格式证书的信息:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl x509 -<span class="keyword">in</span> certificate.pem -text -noout</span><br></pre></td></tr></table></figure></p>
-<p>Apache和UNIX服务器偏向于使用这种编码格式.</p>
-<p><strong>DER</strong> - Distinguished Encoding Rules,打开看是二进制格式,不可读.<br>查看DER格式证书的信息:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl x509 -<span class="keyword">in</span> certificate.der -inform der -text -noout</span><br></pre></td></tr></table></figure></p>
-<p>Java和Windows服务器偏向于使用这种编码格式.</p>
-<h4 id="相关证书文件扩展名"><a href="#相关证书文件扩展名" class="headerlink" title="相关证书文件扩展名"></a>相关证书文件扩展名</h4><p><strong>.pem</strong> - 可以单独存放证书或秘钥,也可以同时存放证书和密码,一般可以通过编辑器查看.</p>
-<p><strong>.key</strong> - 单独存放的pem格式或者der格式的秘钥,一般保存为*.key.<br>查看KEY的方法:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl rsa -<span class="keyword">in</span> mykey.key -text -noout</span><br></pre></td></tr></table></figure></p>
-<p>如果是DER格式的话:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl rsa -<span class="keyword">in</span> mykey.key -text -noout -inform der</span><br></pre></td></tr></table></figure></p>
-<p><strong>.cer .crt</strong> - 两个都是存放的证书,Linux下叫crt, Windows下叫cer,存储格式可以是pem/der.</p>
-<p><strong>.p12</strong> - 包含证书和秘钥的封装格式,是二进制文件.<br>p12提取用户证书的方法:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">openssl pkcs12 -<span class="keyword">in</span> test.p12 -clcerts -nokeys -out cert.pem  </span><br><span class="line">openssl pkcs12 -<span class="keyword">in</span> test.p12 -clcerts -nokeys -out cert.crt</span><br></pre></td></tr></table></figure></p>
-<p>如果需要携带秘钥,则去掉 -nokeys:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">openssl pkcs12 -<span class="keyword">in</span> test.p12 -clcerts -out cert.pem</span><br><span class="line">openssl pkcs12 -<span class="keyword">in</span> test.p12 -clcerts -out cert.crt</span><br></pre></td></tr></table></figure></p>
-<p>提取私钥的方法:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl pkcs12 -<span class="keyword">in</span> test.p12 -nocerts -out key.pem</span><br></pre></td></tr></table></figure></p>
-<h4 id="证书编码的转换"><a href="#证书编码的转换" class="headerlink" title="证书编码的转换"></a>证书编码的转换</h4><p>PEM转为DER<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl x509 -<span class="keyword">in</span> cert.crt -outform der -out cert.der</span><br></pre></td></tr></table></figure></p>
-<p>DER转为PEM<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl x509 -<span class="keyword">in</span> cert.crt -inform der -outform pem -out cert.pem</span><br></pre></td></tr></table></figure></p>
-<h3 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h3><ul>
-<li><a href="http://blog.csdn.net/lifetragedy/article/details/7699236" target="_blank" rel="noopener">通向架构师的道路（第二天）之apache tomcat https应用</a></li>
-<li><a href="https://mp.weixin.qq.com/s/StqqafHePlBkWAPQZg3NrA" target="_blank" rel="noopener">一个故事讲完https</a></li>
-<li><a href="http://blog.csdn.net/duanbokan/article/details/50847612" target="_blank" rel="noopener">Https单向认证和双向认证</a></li>
-<li><a href="http://www.cnblogs.com/guogangj/p/4118605.html" target="_blank" rel="noopener">那些证书相关的玩意儿(SSL,X.509,PEM,DER,CRT,CER,KEY,CSR,P12等)</a></li>
-</ul>
-
-          
+          关于HTTPS协议的一点笔记.
+1.HTTPS相关概念1.1 HTTP协议
+超文本传输协议(HTTP,HyperText Transfer Protocol)是互联网上应用最为广泛的一种网络协议,所有的WWW文件都必须遵守这个标准.HTTP协议传输的数据都是未加密的,也就是明文的,因此使用HTTP协
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/02/08/A-Note-About-HTTPS-Protocol/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -567,17 +630,15 @@
       
         
           
-            <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>
-
-          
+          Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in 
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/02/08/hello-world/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -657,7 +718,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-count">3</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -679,7 +740,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-count">2</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>
