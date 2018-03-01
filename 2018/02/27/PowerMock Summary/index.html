@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="evanxu.blog">
 <meta property="og:description" content="PowerMock的一些使用总结 1.Mock的作用 在做单元测试的时候,我们会发现我们要测试的方法会引用很多外部依赖的对象,比如:(发送邮件,网络通讯,远程服务,文件系统等等).而我们没法控制这些外部依赖的对象，为了解决这个问题，我们就需要用到Mock工具来模拟这些外部依赖的对象，来完成单元测试.  2.PowerMock的优点 现如今比较流行的Mock工具如jMock、EasyMock、Moc">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2018-03-01T16:20:42.312Z">
+<meta property="og:updated_time" content="2018-03-01T16:21:55.019Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="PowerMock使用总结">
 <meta name="twitter:description" content="PowerMock的一些使用总结 1.Mock的作用 在做单元测试的时候,我们会发现我们要测试的方法会引用很多外部依赖的对象,比如:(发送邮件,网络通讯,远程服务,文件系统等等).而我们没法控制这些外部依赖的对象，为了解决这个问题，我们就需要用到Mock工具来模拟这些外部依赖的对象，来完成单元测试.  2.PowerMock的优点 现如今比较流行的Mock工具如jMock、EasyMock、Moc">
@@ -377,10 +377,10 @@
 </li>
 </ul>
 <h2 id="4-PowerMock使用总结"><a href="#4-PowerMock使用总结" class="headerlink" title="4.PowerMock使用总结"></a>4.PowerMock使用总结</h2><ol>
-<li><p>测试类开头需要添加注解:</p>
+<li><p>测试类开头需要添加注解</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//要使用PowerMock功能需要添加此注解 </span></span><br><span class="line"><span class="meta">@RunWith</span>(PowerMockRunner.class)  </span><br><span class="line"><span class="comment">//若需要mock某类的静态,final,私有方法等需要将类加入此注解</span></span><br><span class="line"><span class="meta">@PrepareForTest</span>(&#123;class1.Class, class2.Class, …&#125;)</span><br></pre></td></tr></table></figure>
 </li>
-<li><p>Spy的使用:<br>若使用spy(Class)根据类来创建spy对象,则该类中的方法在不指定mock行为时均执行真实方法,该方法跟mockStatic()的差别是: mockStatic会将所有类中的静态方法mock,而spy方法则只会对指定了mock行为的方法进行mock.<br>若使用spy(Object)根据一个实例来创建对象,则spy对象相当于是该实例的一个浅拷贝对象,对于基本类型会拷贝实例的值,对于引用类型则会直接拷贝其引用.</p>
+<li><p>Spy的使用<br>若使用spy(Class)根据类来创建spy对象,则该类中的方法在不指定mock行为时均执行真实方法,该方法跟mockStatic()的差别是: mockStatic会将所有类中的静态方法mock,而spy方法则只会对指定了mock行为的方法进行mock.<br>若使用spy(Object)根据一个实例来创建对象,则spy对象相当于是该实例的一个浅拷贝对象,对于基本类型会拷贝实例的值,对于引用类型则会直接拷贝其引用.</p>
 </li>
 <li>测试方法的单一职责<br>对于LLT的编写,应该尽量保证一个测试方法只测试一个待测方法,应避免一个测试方法覆盖多个待测方法,这样会导致后期修改业务代码后对LLT的维护难度增大,业务代码中的多处改动都可能导致该测试方法的执行失败,使得对于LLT的修改变得频繁.</li>
 <li>合理分配测试类的初始化工作<br>JUnit通过@BeforeClass, @Before, @After, @AfterClass等注解来控制单元测试的生命周期,而其中的@Before, @BeforeClass与构造器都可以用来对测试方法需要用到的对象属性做初始化工作,可以通过将不同的属性初始化放在不同的生命周期内,使得属性的初始化与待测类的初始化在逻辑上保持一致性.</li>
