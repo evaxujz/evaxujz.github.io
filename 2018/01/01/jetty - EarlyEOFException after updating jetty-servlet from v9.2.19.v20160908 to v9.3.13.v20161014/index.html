@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="Jetty," />
 
 
 
@@ -79,17 +79,23 @@
 
 
 
-<meta name="description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick">
+<meta name="description" content="1.问题简述 某次服务版本升级后的接口测试过程中, 测试发现当服务调用VCloud系统接口时,产生了EarlyEOFException, 最开始以为是环境问题所以让测试换了测试环境, 但在更换完环境后发现异常没有消除,所以开始进行排查  2.排查过程 首先回退了服务版本进行接口测试, 确认旧版本不存在改问题, 确认该问题为修改引入.  通过git log查看版本间的修改差异, 并确认了关于请求调用">
+<meta name="keywords" content="Jetty">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Hello World">
-<meta property="og:url" content="http://www.evanxu.info/2018/02/08/hello-world/index.html">
+<meta property="og:title" content="升级jetty-servlet-v9.2.19.v20160908到v9.3.13.v20161014产生的Http请求的EarlyEOFException">
+<meta property="og:url" content="http://www.evanxu.info/2018/01/01/jetty - EarlyEOFException after updating jetty-servlet from v9.2.19.v20160908 to v9.3.13.v20161014/index.html">
 <meta property="og:site_name" content="evanxu.blog">
-<meta property="og:description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick">
+<meta property="og:description" content="1.问题简述 某次服务版本升级后的接口测试过程中, 测试发现当服务调用VCloud系统接口时,产生了EarlyEOFException, 最开始以为是环境问题所以让测试换了测试环境, 但在更换完环境后发现异常没有消除,所以开始进行排查  2.排查过程 首先回退了服务版本进行接口测试, 确认旧版本不存在改问题, 确认该问题为修改引入.  通过git log查看版本间的修改差异, 并确认了关于请求调用">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2018-02-08T14:36:11.783Z">
+<meta property="og:image" content="http://evaxujz-hexo-image.oss-cn-shenzhen.aliyuncs.com/v9.2.19.v20160908-SslContextFactory%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0.png">
+<meta property="og:image" content="http://evaxujz-hexo-image.oss-cn-shenzhen.aliyuncs.com/v9.3.13.v20161014-SslContextFactory%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0.png">
+<meta property="og:image" content="http://evaxujz-hexo-image.oss-cn-shenzhen.aliyuncs.com/setExcludeCipherSuites.png">
+<meta property="og:image" content="http://evaxujz-hexo-image.oss-cn-shenzhen.aliyuncs.com/removeExcludedCipherSuites.png">
+<meta property="og:updated_time" content="2019-01-01T13:26:52.588Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hello World">
-<meta name="twitter:description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick">
+<meta name="twitter:title" content="升级jetty-servlet-v9.2.19.v20160908到v9.3.13.v20161014产生的Http请求的EarlyEOFException">
+<meta name="twitter:description" content="1.问题简述 某次服务版本升级后的接口测试过程中, 测试发现当服务调用VCloud系统接口时,产生了EarlyEOFException, 最开始以为是环境问题所以让测试换了测试环境, 但在更换完环境后发现异常没有消除,所以开始进行排查  2.排查过程 首先回退了服务版本进行接口测试, 确认旧版本不存在改问题, 确认该问题为修改引入.  通过git log查看版本间的修改差异, 并确认了关于请求调用">
+<meta name="twitter:image" content="http://evaxujz-hexo-image.oss-cn-shenzhen.aliyuncs.com/v9.2.19.v20160908-SslContextFactory%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0.png">
 
 
 
@@ -119,13 +125,13 @@
 
 
 
-  <link rel="canonical" href="http://www.evanxu.info/2018/02/08/hello-world/"/>
+  <link rel="canonical" href="http://www.evanxu.info/2018/01/01/jetty - EarlyEOFException after updating jetty-servlet from v9.2.19.v20160908 to v9.3.13.v20161014/"/>
 
 
 
 
 
-  <title>Hello World | evanxu.blog</title>
+  <title>升级jetty-servlet-v9.2.19.v20160908到v9.3.13.v20161014产生的Http请求的EarlyEOFException | evanxu.blog</title>
   
 
 
@@ -262,7 +268,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://www.evanxu.info/2018/02/08/hello-world/">
+    <link itemprop="mainEntityOfPage" href="http://www.evanxu.info/2018/01/01/jetty - EarlyEOFException after updating jetty-servlet from v9.2.19.v20160908 to v9.3.13.v20161014/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Evan Xu">
@@ -279,7 +285,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Hello World</h1>
+          <h1 class="post-title" itemprop="name headline">升级jetty-servlet-v9.2.19.v20160908到v9.3.13.v20161014产生的Http请求的EarlyEOFException</h1>
         
 
         <div class="post-meta">
@@ -291,8 +297,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-02-08T21:45:45+08:00">
-                2018-02-08
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-01T21:00:00+08:00">
+                2018-01-01
               </time>
             
 
@@ -301,6 +307,28 @@
             
           </span>
 
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
           
 
           
@@ -329,15 +357,34 @@
       
 
       
-        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>
+        <h2 id="1-问题简述"><a href="#1-问题简述" class="headerlink" title="1.问题简述"></a>1.问题简述</h2><blockquote>
+<p>某次服务版本升级后的接口测试过程中, 测试发现当服务调用VCloud系统接口时,<br>产生了EarlyEOFException, 最开始以为是环境问题所以让测试换了测试环境, 但在更换完环境后发现异常没有消除,<br>所以开始进行排查</p>
+</blockquote>
+<h2 id="2-排查过程"><a href="#2-排查过程" class="headerlink" title="2.排查过程"></a>2.排查过程</h2><ol>
+<li><p>首先回退了服务版本进行接口测试, 确认旧版本不存在改问题, 确认该问题为修改引入.</p>
+</li>
+<li><p>通过git log查看版本间的修改差异, 并确认了关于请求调用部分的修改:<br> 通过比对发现调用部分没有修改, 但观察到版本之间进行过三方件版本的升级,<br> 并确认到底层是使用的jetty三方件作为Http请求的客户端且jetty版本经过升级.</p>
+</li>
+<li><p>但是同样升级过jetty版本的其它服务却没有出现类似的EarlyEOFException问题, 线索一下子丢失.</p>
+</li>
+<li><p>检查查找了一下发生该错误的可能原因, 发现可能是由于在建立TCP连接时发生错误导致的.</p>
+</li>
+<li><p>通过tcpdump工具抓取了服务对VCloud发送请求时的网络数据包:<br> 通过分析网络数据包, 发现当服务发送了Client Hello包之后, 服务端没有返回Server Hello,<br> 基本确定是由于TCP连接无法成功建立导致的该问题.</p>
+</li>
+<li><p>重新将服务版本回退并用正常版本发起请求后获取网络数据包:<br> 通过比较网络数据包, 发现两者的差异在于客户端发送的支持算法套有差异,<br> 使用新版本的Jetty包发送的Client Hello, 携带的算法套与配置的算法套有差异.</p>
+</li>
+<li><p>开启jdwp, 线上跟踪代码, 确认算法套是在何处被修改:<br> 通过跟踪代码发现Jetty通过<code>SslContextFactory</code>工厂生成SSLContext时,<br> 在经过<code>removeExcludedCipherSuites</code>方法后有部分算法套被移除了.</p>
+</li>
+<li><p>在比对了两个版本的<code>SslContextFactory</code>后, 确认了是由于新版的<code>SslContextFactory</code>在构造函数内<br>默认移除了一些安全性较低的算法套, 而在移除这些算法套后, 导致VCloud和服务端之间没有可支持的相同算法套<br>导致了EarlyEOFException.</p>
+</li>
+</ol>
+<h2 id="3-代码"><a href="#3-代码" class="headerlink" title="3.代码"></a>3.代码</h2><h3 id="3-1-1-SslContextFactory构造函数-v9-2-19-v20160908"><a href="#3-1-1-SslContextFactory构造函数-v9-2-19-v20160908" class="headerlink" title="3.1.1.SslContextFactory构造函数 - v9.2.19.v20160908"></a>3.1.1.<code>SslContextFactory</code>构造函数 - v9.2.19.v20160908</h3><p><img src="http://evaxujz-hexo-image.oss-cn-shenzhen.aliyuncs.com/v9.2.19.v20160908-SslContextFactory%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0.png" alt="v9.2.19.v20160908-SslContextFactory构造函数"></p>
+<h3 id="3-1-2-SslContextFactory构造函数-v9-3-13-v20161014"><a href="#3-1-2-SslContextFactory构造函数-v9-3-13-v20161014" class="headerlink" title="3.1.2.SslContextFactory构造函数 - v9.3.13.v20161014"></a>3.1.2.<code>SslContextFactory</code>构造函数 - v9.3.13.v20161014</h3><p><img src="http://evaxujz-hexo-image.oss-cn-shenzhen.aliyuncs.com/v9.3.13.v20161014-SslContextFactory%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0.png" alt="v9.3.13.v20161014-SslContextFactory构造函数"></p>
+<h3 id="3-2-setExcludeCipherSuites"><a href="#3-2-setExcludeCipherSuites" class="headerlink" title="3.2.setExcludeCipherSuites"></a>3.2.<code>setExcludeCipherSuites</code></h3><p><img src="http://evaxujz-hexo-image.oss-cn-shenzhen.aliyuncs.com/setExcludeCipherSuites.png" alt="setExcludeCipherSuites"></p>
+<h3 id="3-3-removeExcludedCipherSuites"><a href="#3-3-removeExcludedCipherSuites" class="headerlink" title="3.3.removeExcludedCipherSuites"></a>3.3.<code>removeExcludedCipherSuites</code></h3><p><img src="http://evaxujz-hexo-image.oss-cn-shenzhen.aliyuncs.com/removeExcludedCipherSuites.png" alt="removeExcludedCipherSuites"></p>
+<h2 id="4-解决方法"><a href="#4-解决方法" class="headerlink" title="4.解决方法"></a>4.解决方法</h2><blockquote>
+<p>创建完SSLContext后, 执行<code>setExcludeCipherSuites(new String[0])</code></p>
+</blockquote>
 
       
     </div>
@@ -353,6 +400,12 @@
 
     <footer class="post-footer">
       
+        <div class="post-tags">
+          
+            <a href="/tags/Jetty/" rel="tag"># Jetty</a>
+          
+        </div>
+      
 
       
       
@@ -362,18 +415,14 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/01/01/jetty - EarlyEOFException after updating jetty-servlet from v9.2.19.v20160908 to v9.3.13.v20161014/" rel="next" title="升级jetty-servlet-v9.2.19.v20160908到v9.3.13.v20161014产生的Http请求的EarlyEOFException">
-                <i class="fa fa-chevron-left"></i> 升级jetty-servlet-v9.2.19.v20160908到v9.3.13.v20161014产生的Http请求的EarlyEOFException
-              </a>
-            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2018/02/08/A Note about HTTPS Protocol/" rel="prev" title="HTTPS协议详解">
-                HTTPS协议详解 <i class="fa fa-chevron-right"></i>
+              <a href="/2018/02/08/hello-world/" rel="prev" title="Hello World">
+                Hello World <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -506,7 +555,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Quick-Start"><span class="nav-number">1.</span> <span class="nav-text">Quick Start</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Create-a-new-post"><span class="nav-number">1.1.</span> <span class="nav-text">Create a new post</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Run-server"><span class="nav-number">1.2.</span> <span class="nav-text">Run server</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Generate-static-files"><span class="nav-number">1.3.</span> <span class="nav-text">Generate static files</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Deploy-to-remote-sites"><span class="nav-number">1.4.</span> <span class="nav-text">Deploy to remote sites</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-问题简述"><span class="nav-number">1.</span> <span class="nav-text">1.问题简述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-排查过程"><span class="nav-number">2.</span> <span class="nav-text">2.排查过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-代码"><span class="nav-number">3.</span> <span class="nav-text">3.代码</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-1-SslContextFactory构造函数-v9-2-19-v20160908"><span class="nav-number">3.1.</span> <span class="nav-text">3.1.1.SslContextFactory构造函数 - v9.2.19.v20160908</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-2-SslContextFactory构造函数-v9-3-13-v20161014"><span class="nav-number">3.2.</span> <span class="nav-text">3.1.2.SslContextFactory构造函数 - v9.3.13.v20161014</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-setExcludeCipherSuites"><span class="nav-number">3.3.</span> <span class="nav-text">3.2.setExcludeCipherSuites</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-removeExcludedCipherSuites"><span class="nav-number">3.4.</span> <span class="nav-text">3.3.removeExcludedCipherSuites</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-解决方法"><span class="nav-number">4.</span> <span class="nav-text">4.解决方法</span></a></li></ol></div>
             
 
           </div>
