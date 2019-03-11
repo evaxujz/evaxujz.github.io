@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="PowerMock," />
+  <meta name="keywords" content="Jetty," />
 
 
 
@@ -79,18 +79,23 @@
 
 
 
-<meta name="description" content="PowerMock的一些使用总结 1.Mock的作用 在做单元测试的时候,我们会发现我们要测试的方法会引用很多外部依赖的对象,比如:(发送邮件,网络通讯,远程服务,文件系统等等).而我们没法控制这些外部依赖的对象，为了解决这个问题，我们就需要用到Mock工具来模拟这些外部依赖的对象，来完成单元测试.  2.PowerMock的优点 现如今比较流行的Mock工具如jMock、EasyMock、Moc">
-<meta name="keywords" content="PowerMock">
+<meta name="description" content="1.问题简述 某次服务版本升级后的接口测试过程中, 测试发现当服务调用VCloud系统接口时,产生了EarlyEOFException, 最开始以为是环境问题所以让测试换了测试环境, 但在更换完环境后发现异常没有消除,所以开始进行排查  2.排查过程 首先回退了服务版本进行接口测试, 确认旧版本不存在改问题, 确认该问题为修改引入.  通过git log查看版本间的修改差异, 并确认了关于请求调用">
+<meta name="keywords" content="Jetty">
 <meta property="og:type" content="article">
-<meta property="og:title" content="PowerMock使用总结">
-<meta property="og:url" content="http://www.evanxu.info/2018/02/27/PowerMock Summary/index.html">
+<meta property="og:title" content="升级jetty-servlet-v9.2.19.v20160908到v9.3.13.v20161014导致的EarlyEOFException">
+<meta property="og:url" content="http://www.evanxu.info/2019/01/01/Jetty - EarlyEOFException after updating jetty-servlet from v9.2.19.v20160908 to v9.3.13.v20161014/index.html">
 <meta property="og:site_name" content="evanxu.blog">
-<meta property="og:description" content="PowerMock的一些使用总结 1.Mock的作用 在做单元测试的时候,我们会发现我们要测试的方法会引用很多外部依赖的对象,比如:(发送邮件,网络通讯,远程服务,文件系统等等).而我们没法控制这些外部依赖的对象，为了解决这个问题，我们就需要用到Mock工具来模拟这些外部依赖的对象，来完成单元测试.  2.PowerMock的优点 现如今比较流行的Mock工具如jMock、EasyMock、Moc">
+<meta property="og:description" content="1.问题简述 某次服务版本升级后的接口测试过程中, 测试发现当服务调用VCloud系统接口时,产生了EarlyEOFException, 最开始以为是环境问题所以让测试换了测试环境, 但在更换完环境后发现异常没有消除,所以开始进行排查  2.排查过程 首先回退了服务版本进行接口测试, 确认旧版本不存在改问题, 确认该问题为修改引入.  通过git log查看版本间的修改差异, 并确认了关于请求调用">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2018-03-01T16:21:55.019Z">
+<meta property="og:image" content="http://evaxujz-hexo-image.oss-cn-shenzhen.aliyuncs.com/v9.2.19.v20160908-SslContextFactory%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0.png">
+<meta property="og:image" content="http://evaxujz-hexo-image.oss-cn-shenzhen.aliyuncs.com/v9.3.13.v20161014-SslContextFactory%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0.png">
+<meta property="og:image" content="http://evaxujz-hexo-image.oss-cn-shenzhen.aliyuncs.com/setExcludeCipherSuites.png">
+<meta property="og:image" content="http://evaxujz-hexo-image.oss-cn-shenzhen.aliyuncs.com/removeExcludedCipherSuites.png">
+<meta property="og:updated_time" content="2019-01-01T13:37:05.297Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="PowerMock使用总结">
-<meta name="twitter:description" content="PowerMock的一些使用总结 1.Mock的作用 在做单元测试的时候,我们会发现我们要测试的方法会引用很多外部依赖的对象,比如:(发送邮件,网络通讯,远程服务,文件系统等等).而我们没法控制这些外部依赖的对象，为了解决这个问题，我们就需要用到Mock工具来模拟这些外部依赖的对象，来完成单元测试.  2.PowerMock的优点 现如今比较流行的Mock工具如jMock、EasyMock、Moc">
+<meta name="twitter:title" content="升级jetty-servlet-v9.2.19.v20160908到v9.3.13.v20161014导致的EarlyEOFException">
+<meta name="twitter:description" content="1.问题简述 某次服务版本升级后的接口测试过程中, 测试发现当服务调用VCloud系统接口时,产生了EarlyEOFException, 最开始以为是环境问题所以让测试换了测试环境, 但在更换完环境后发现异常没有消除,所以开始进行排查  2.排查过程 首先回退了服务版本进行接口测试, 确认旧版本不存在改问题, 确认该问题为修改引入.  通过git log查看版本间的修改差异, 并确认了关于请求调用">
+<meta name="twitter:image" content="http://evaxujz-hexo-image.oss-cn-shenzhen.aliyuncs.com/v9.2.19.v20160908-SslContextFactory%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0.png">
 
 
 
@@ -120,13 +125,13 @@
 
 
 
-  <link rel="canonical" href="http://www.evanxu.info/2018/02/27/PowerMock Summary/"/>
+  <link rel="canonical" href="http://www.evanxu.info/2019/01/01/Jetty - EarlyEOFException after updating jetty-servlet from v9.2.19.v20160908 to v9.3.13.v20161014/"/>
 
 
 
 
 
-  <title>PowerMock使用总结 | evanxu.blog</title>
+  <title>升级jetty-servlet-v9.2.19.v20160908到v9.3.13.v20161014导致的EarlyEOFException | evanxu.blog</title>
   
 
 
@@ -263,7 +268,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://www.evanxu.info/2018/02/27/PowerMock Summary/">
+    <link itemprop="mainEntityOfPage" href="http://www.evanxu.info/2019/01/01/Jetty - EarlyEOFException after updating jetty-servlet from v9.2.19.v20160908 to v9.3.13.v20161014/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Evan Xu">
@@ -280,7 +285,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">PowerMock使用总结</h1>
+          <h1 class="post-title" itemprop="name headline">升级jetty-servlet-v9.2.19.v20160908到v9.3.13.v20161014导致的EarlyEOFException</h1>
         
 
         <div class="post-meta">
@@ -292,8 +297,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-02-27T21:20:00+08:00">
-                2018-02-27
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-01-01T21:00:00+08:00">
+                2019-01-01
               </time>
             
 
@@ -315,8 +320,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Note/" itemprop="url" rel="index">
-                    <span itemprop="name">Note</span>
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
                   </a>
                 </span>
 
@@ -352,66 +357,34 @@
       
 
       
-        <p>PowerMock的一些使用总结</p>
-<h2 id="1-Mock的作用"><a href="#1-Mock的作用" class="headerlink" title="1.Mock的作用"></a>1.Mock的作用</h2><blockquote>
-<p>在做单元测试的时候,我们会发现我们要测试的方法会引用很多外部依赖的对象,比如:(发送邮件,网络通讯,远程服务,文件系统等等).而我们没法控制这些外部依赖的对象，为了解决这个问题，我们就需要用到Mock工具来模拟这些外部依赖的对象，来完成单元测试.</p>
+        <h2 id="1-问题简述"><a href="#1-问题简述" class="headerlink" title="1.问题简述"></a>1.问题简述</h2><blockquote>
+<p>某次服务版本升级后的接口测试过程中, 测试发现当服务调用VCloud系统接口时,<br>产生了EarlyEOFException, 最开始以为是环境问题所以让测试换了测试环境, 但在更换完环境后发现异常没有消除,<br>所以开始进行排查</p>
 </blockquote>
-<h2 id="2-PowerMock的优点"><a href="#2-PowerMock的优点" class="headerlink" title="2.PowerMock的优点"></a>2.PowerMock的优点</h2><blockquote>
-<p>现如今比较流行的Mock工具如jMock、EasyMock、Mockito等都有一个共同的缺点:不能mock静态、final、私有方法等.而PowerMock能够完美的弥补以上三个Mock工具的不足.</p>
+<h2 id="2-排查过程"><a href="#2-排查过程" class="headerlink" title="2.排查过程"></a>2.排查过程</h2><ol>
+<li><p>首先回退了服务版本进行接口测试, 确认旧版本不存在改问题, 确认该问题为修改引入.</p>
+</li>
+<li><p>通过git log查看版本间的修改差异, 并确认了关于请求调用部分的修改:<br> 通过比对发现调用部分没有修改, 但观察到版本之间进行过三方件版本的升级,<br> 并确认到底层是使用的jetty三方件作为Http请求的客户端且jetty版本经过升级.</p>
+</li>
+<li><p>但是同样升级过jetty版本的其它服务却没有出现类似的EarlyEOFException问题, 线索一下子丢失.</p>
+</li>
+<li><p>检查查找了一下发生该错误的可能原因, 发现可能是由于在建立TCP连接时发生错误导致的.</p>
+</li>
+<li><p>通过tcpdump工具抓取了服务对VCloud发送请求时的网络数据包:<br> 通过分析网络数据包, 发现当服务发送了Client Hello包之后, 服务端没有返回Server Hello,<br> 基本确定是由于TCP连接无法成功建立导致的该问题.</p>
+</li>
+<li><p>重新将服务版本回退并用正常版本发起请求后获取网络数据包:<br> 通过比较网络数据包, 发现两者的差异在于客户端发送的支持算法套有差异,<br> 使用新版本的Jetty包发送的Client Hello, 携带的算法套与配置的算法套有差异.</p>
+</li>
+<li><p>开启jdwp, 线上跟踪代码, 确认算法套是在何处被修改:<br> 通过跟踪代码发现Jetty通过<code>SslContextFactory</code>工厂生成SSLContext时,<br> 在经过<code>removeExcludedCipherSuites</code>方法后有部分算法套被移除了.</p>
+</li>
+<li><p>在比对了两个版本的<code>SslContextFactory</code>后, 确认了是由于新版的<code>SslContextFactory</code>在构造函数内<br>默认移除了一些安全性较低的算法套, 而在移除这些算法套后, 导致VCloud和服务端之间没有可支持的相同算法套<br>导致了EarlyEOFException.</p>
+</li>
+</ol>
+<h2 id="3-代码"><a href="#3-代码" class="headerlink" title="3.代码"></a>3.代码</h2><h3 id="3-1-1-SslContextFactory构造函数-v9-2-19-v20160908"><a href="#3-1-1-SslContextFactory构造函数-v9-2-19-v20160908" class="headerlink" title="3.1.1.SslContextFactory构造函数 - v9.2.19.v20160908"></a>3.1.1.<code>SslContextFactory</code>构造函数 - v9.2.19.v20160908</h3><p><img src="http://evaxujz-hexo-image.oss-cn-shenzhen.aliyuncs.com/v9.2.19.v20160908-SslContextFactory%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0.png" alt="v9.2.19.v20160908-SslContextFactory构造函数"></p>
+<h3 id="3-1-2-SslContextFactory构造函数-v9-3-13-v20161014"><a href="#3-1-2-SslContextFactory构造函数-v9-3-13-v20161014" class="headerlink" title="3.1.2.SslContextFactory构造函数 - v9.3.13.v20161014"></a>3.1.2.<code>SslContextFactory</code>构造函数 - v9.3.13.v20161014</h3><p><img src="http://evaxujz-hexo-image.oss-cn-shenzhen.aliyuncs.com/v9.3.13.v20161014-SslContextFactory%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0.png" alt="v9.3.13.v20161014-SslContextFactory构造函数"></p>
+<h3 id="3-2-setExcludeCipherSuites"><a href="#3-2-setExcludeCipherSuites" class="headerlink" title="3.2.setExcludeCipherSuites"></a>3.2.<code>setExcludeCipherSuites</code></h3><p><img src="http://evaxujz-hexo-image.oss-cn-shenzhen.aliyuncs.com/setExcludeCipherSuites.png" alt="setExcludeCipherSuites"></p>
+<h3 id="3-3-removeExcludedCipherSuites"><a href="#3-3-removeExcludedCipherSuites" class="headerlink" title="3.3.removeExcludedCipherSuites"></a>3.3.<code>removeExcludedCipherSuites</code></h3><p><img src="http://evaxujz-hexo-image.oss-cn-shenzhen.aliyuncs.com/removeExcludedCipherSuites.png" alt="removeExcludedCipherSuites"></p>
+<h2 id="4-解决方法"><a href="#4-解决方法" class="headerlink" title="4.解决方法"></a>4.解决方法</h2><blockquote>
+<p>创建完SSLContext后, 执行<code>setExcludeCipherSuites(new String[0])</code></p>
 </blockquote>
-<h2 id="3-PowerMock涉及到的相关概念"><a href="#3-PowerMock涉及到的相关概念" class="headerlink" title="3.PowerMock涉及到的相关概念"></a>3.PowerMock涉及到的相关概念</h2><ul>
-<li>检测:单元测试的目的是检验代码是够按照预期运行,一般来说,有两种验证方式.<ol>
-<li>状态监测: 通过检测方法的状态判断方法是否运行成功(判断方法的返回结果是够符合预期).</li>
-<li>行为检测: 通过检测方法的执行行为判断方法是否运行成功(判断方法是否成功被调用).</li>
-</ol>
-</li>
-<li>替换对象: 在使用mock方法模拟对象时会使用到不同的替换对象.<ol>
-<li>桩(stub): 模拟一个Object,不执行真正逻辑,直接返回指定值,多用于状态监测.</li>
-<li>模拟对象(mock): 模拟一个Object,但不关心返回值,更关心对象的期望行为,只关心特定方法是否被使用,多用于行为检测,可用于验证返回void的场景.</li>
-</ol>
-</li>
-<li>部分Mock: 对于某些测试,只希望模拟对象的部分方法,保留部分真实方法,此时有两种选择.<ol>
-<li>创建mock对象,对需要执行真实逻辑的方法调用do(then)CallRealMethod()执行真实方法.</li>
-<li>使用spy函数创建监视对象,对需要执行mock的方法进行指定,默认会运行真实的逻辑代码.</li>
-</ol>
-</li>
-</ul>
-<h2 id="4-PowerMock使用总结"><a href="#4-PowerMock使用总结" class="headerlink" title="4.PowerMock使用总结"></a>4.PowerMock使用总结</h2><ol>
-<li><p>测试类开头需要添加注解</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//要使用PowerMock功能需要添加此注解 </span></span><br><span class="line"><span class="meta">@RunWith</span>(PowerMockRunner.class)  </span><br><span class="line"><span class="comment">//若需要mock某类的静态,final,私有方法等需要将类加入此注解</span></span><br><span class="line"><span class="meta">@PrepareForTest</span>(&#123;class1.Class, class2.Class, …&#125;)</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>Spy的使用<br>若使用spy(Class)根据类来创建spy对象,则该类中的方法在不指定mock行为时均执行真实方法,该方法跟mockStatic()的差别是: mockStatic会将所有类中的静态方法mock,而spy方法则只会对指定了mock行为的方法进行mock.<br>若使用spy(Object)根据一个实例来创建对象,则spy对象相当于是该实例的一个浅拷贝对象,对于基本类型会拷贝实例的值,对于引用类型则会直接拷贝其引用.</p>
-</li>
-<li>测试方法的单一职责<br>对于LLT的编写,应该尽量保证一个测试方法只测试一个待测方法,应避免一个测试方法覆盖多个待测方法,这样会导致后期修改业务代码后对LLT的维护难度增大,业务代码中的多处改动都可能导致该测试方法的执行失败,使得对于LLT的修改变得频繁.</li>
-<li>合理分配测试类的初始化工作<br>JUnit通过@BeforeClass, @Before, @After, @AfterClass等注解来控制单元测试的生命周期,而其中的@Before, @BeforeClass与构造器都可以用来对测试方法需要用到的对象属性做初始化工作,可以通过将不同的属性初始化放在不同的生命周期内,使得属性的初始化与待测类的初始化在逻辑上保持一致性.</li>
-<li>do..when 与 when..then的区别<br>采用do..when的mock方式,在执行被mock的方法时不会执行真正的代码逻辑,而when..then在执行mock方法时会执行真正的代码逻辑.</li>
-<li>whenNew的使用<br>当需要使用whenNew来mock一个新实例时需要将使用到new语句的类写入到@PrepareForTest注解中,一般用到new的是待测类.</li>
-<li><p>doAnswer的使用<br>doAnswer().when()一般配合使用,当满足条件时执行对应的Answer的answer方法,如果answer()抛出异常,那么测试不通过<br>使用doAnswer()需要传入一个实现了Answer<t>接口的类实例:</t></p>
-<pre><code class="java"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CustomAnswer</span> <span class="keyword">implements</span> <span class="title">Answer</span>&lt;<span class="title">String</span>&gt; </span>{  
-<span class="function"><span class="keyword">public</span> String <span class="title">answer</span><span class="params">(InvocationOnMock invocation)</span> <span class="keyword">throws</span> Throwable </span>{  
-    Object[] args = invocation.getArguments();  
-    Integer num = (Integer)args[<span class="number">0</span>];  
-    <span class="keyword">if</span>( num &gt; <span class="number">3</span> ){  
-        <span class="keyword">return</span> <span class="string">"yes"</span>;  
-    } <span class="keyword">else</span> {  
-        <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException();  
-    }  
- }  
-
- <span class="meta">@Test</span>  
- <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">customAnswerTest</span><span class="params">()</span></span>{  
-     List&lt;String&gt; mock = mock(List.class);  
-     Mockito.doAnswer(<span class="keyword">new</span> CustomAnswer()).when(mock).get(anyInt());  
-     mock.get(<span class="number">4</span>);   
-     mock.get(<span class="number">2</span>);          
- }   
-}
-</code></pre>
-</li>
-</ol>
-<h2 id="5-常见错误总结"><a href="#5-常见错误总结" class="headerlink" title="5.常见错误总结"></a>5.常见错误总结</h2><ol>
-<li>ExceptionInitializerError<br>可能原因: 测试涉及到的类初始化失败<br>解决方法: 查看相应的涉及到的类,对于mock无法成功处理的初始化可以手动构建或者在@SuppressStaticInitializationFor注解中抑制初始化过程.</li>
-</ol>
 
       
     </div>
@@ -429,7 +402,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/PowerMock/" rel="tag"># PowerMock</a>
+            <a href="/tags/Jetty/" rel="tag"># Jetty</a>
           
         </div>
       
@@ -442,8 +415,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/02/08/A Note about HTTPS Protocol/" rel="next" title="HTTPS协议详解">
-                <i class="fa fa-chevron-left"></i> HTTPS协议详解
+              <a href="/2018/12/23/gRPC - How to get the client's IP/" rel="next" title="gRPC-如何获取客户端IP">
+                <i class="fa fa-chevron-left"></i> gRPC-如何获取客户端IP
               </a>
             
           </div>
@@ -452,8 +425,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2018/02/28/Proxy Pattern with Java/" rel="prev" title="Java设计模式:代理模式(1)">
-                Java设计模式:代理模式(1) <i class="fa fa-chevron-right"></i>
+              <a href="/2019/01/04/Binary Heap and Heap Sort/" rel="prev" title="二叉堆与堆排序">
+                二叉堆与堆排序 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -586,7 +559,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-Mock的作用"><span class="nav-number">1.</span> <span class="nav-text">1.Mock的作用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-PowerMock的优点"><span class="nav-number">2.</span> <span class="nav-text">2.PowerMock的优点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-PowerMock涉及到的相关概念"><span class="nav-number">3.</span> <span class="nav-text">3.PowerMock涉及到的相关概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-PowerMock使用总结"><span class="nav-number">4.</span> <span class="nav-text">4.PowerMock使用总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-常见错误总结"><span class="nav-number">5.</span> <span class="nav-text">5.常见错误总结</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-问题简述"><span class="nav-number">1.</span> <span class="nav-text">1.问题简述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-排查过程"><span class="nav-number">2.</span> <span class="nav-text">2.排查过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-代码"><span class="nav-number">3.</span> <span class="nav-text">3.代码</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-1-SslContextFactory构造函数-v9-2-19-v20160908"><span class="nav-number">3.1.</span> <span class="nav-text">3.1.1.SslContextFactory构造函数 - v9.2.19.v20160908</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-2-SslContextFactory构造函数-v9-3-13-v20161014"><span class="nav-number">3.2.</span> <span class="nav-text">3.1.2.SslContextFactory构造函数 - v9.3.13.v20161014</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-setExcludeCipherSuites"><span class="nav-number">3.3.</span> <span class="nav-text">3.2.setExcludeCipherSuites</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-removeExcludedCipherSuites"><span class="nav-number">3.4.</span> <span class="nav-text">3.3.removeExcludedCipherSuites</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-解决方法"><span class="nav-number">4.</span> <span class="nav-text">4.解决方法</span></a></li></ol></div>
             
 
           </div>
