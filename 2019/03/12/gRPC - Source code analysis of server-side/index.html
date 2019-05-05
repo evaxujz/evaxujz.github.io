@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="gRPC," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="1.gRPC服务端创建流程 gRPC 服务端创建采用 Build 模式，对底层服务绑定、transportServer 和 NettyServer 的创建和实例化做了封装和屏蔽，让服务调用者不用关心 RPC 调用细节，整体上分为三个过程:  创建 Netty HTTP/2 服务端； 将需要调用的服务端接口实现类注册到内部的 Registry 中，RPC 调用时，可以根据 RPC 请求消息中的服务定">
+<meta name="keywords" content="gRPC">
+<meta property="og:type" content="article">
+<meta property="og:title" content="gRPC - 服务端源码解析">
+<meta property="og:url" content="http://www.evanxu.info/2019/03/12/gRPC - Source code analysis of server-side/index.html">
+<meta property="og:site_name" content="evanxu.blog">
+<meta property="og:description" content="1.gRPC服务端创建流程 gRPC 服务端创建采用 Build 模式，对底层服务绑定、transportServer 和 NettyServer 的创建和实例化做了封装和屏蔽，让服务调用者不用关心 RPC 调用细节，整体上分为三个过程:  创建 Netty HTTP/2 服务端； 将需要调用的服务端接口实现类注册到内部的 Registry 中，RPC 调用时，可以根据 RPC 请求消息中的服务定">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://evaxujz-hexo-image.oss-cn-shenzhen.aliyuncs.com/NettyServerHandler%E7%BB%A7%E6%89%BF%E5%85%B3%E7%B3%BB.png">
+<meta property="og:updated_time" content="2019-03-19T14:36:34.775Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="gRPC - 服务端源码解析">
+<meta name="twitter:description" content="1.gRPC服务端创建流程 gRPC 服务端创建采用 Build 模式，对底层服务绑定、transportServer 和 NettyServer 的创建和实例化做了封装和屏蔽，让服务调用者不用关心 RPC 调用细节，整体上分为三个过程:  创建 Netty HTTP/2 服务端； 将需要调用的服务端接口实现类注册到内部的 Registry 中，RPC 调用时，可以根据 RPC 请求消息中的服务定">
+<meta name="twitter:image" content="http://evaxujz-hexo-image.oss-cn-shenzhen.aliyuncs.com/NettyServerHandler%E7%BB%A7%E6%89%BF%E5%85%B3%E7%B3%BB.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://www.evanxu.info/2019/03/12/gRPC - Source code analysis of server-side/"/>
+
+
+
+
+
+  <title>gRPC - 服务端源码解析 | evanxu.blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">evanxu.blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://www.evanxu.info/2019/03/12/gRPC - Source code analysis of server-side/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Evan Xu">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="evanxu.blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">gRPC - 服务端源码解析</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-03-12T20:00:00+08:00">
+                2019-03-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="1-gRPC服务端创建流程"><a href="#1-gRPC服务端创建流程" class="headerlink" title="1.gRPC服务端创建流程"></a>1.gRPC服务端创建流程</h2><blockquote>
+<p>gRPC 服务端创建采用 Build 模式，对底层服务绑定、transportServer 和 NettyServer 的创建和实例化做了封装和屏蔽，<br>让服务调用者不用关心 RPC 调用细节，整体上分为三个过程:</p>
+<ol>
+<li>创建 Netty HTTP/2 服务端；</li>
+<li>将需要调用的服务端接口实现类注册到内部的 Registry 中，RPC 调用时，可以根据 RPC 请求消息中的服务定义信息查询到服务接口实现类；</li>
+<li>创建 gRPC Server，它是 gRPC 服务端的抽象，聚合了各种 Listener，用于 RPC 消息的统一调度和处理。</li>
+</ol>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">    <span class="comment">/* The port on which the server should run */</span></span><br><span class="line">    <span class="keyword">int</span> port = <span class="number">50051</span>;</span><br><span class="line">    server = ServerBuilder.forPort(port)   &lt;- NettyServerBuilder</span><br><span class="line">            .addService(<span class="keyword">new</span> GreeterImpl())   &lt;- 绑定服务</span><br><span class="line">            .build()   &lt;- ServerImpl(gRPC服务示例, 封装了NettyServer)</span><br><span class="line">            .start();   &lt;- 启动NettyServer</span><br><span class="line">    logger.info(<span class="string">"Server started, listening on "</span> + port);</span><br><span class="line">    Runtime.getRuntime().addShutdownHook(<span class="keyword">new</span> Thread() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="comment">// Use stderr here since the logger may have been reset by its JVM shutdown hook.</span></span><br><span class="line">            System.err.println(<span class="string">"*** shutting down gRPC server since JVM is shutting down"</span>);</span><br><span class="line">            HelloWorldServer.<span class="keyword">this</span>.stop();</span><br><span class="line">            System.err.println(<span class="string">"*** server shut down"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">ServerBuilder.forPort</span><br><span class="line">-&gt; ServerProvider.provider().builderForPort</span><br><span class="line">-&gt; SPI选择Netty组件</span><br><span class="line">-&gt; NettyServerProvider.builderForPort</span><br><span class="line">-&gt; NettyServerBuilder.forPort</span><br><span class="line">-&gt; NettyServerBuilder</span><br><span class="line"></span><br><span class="line">-&gt; NettyServerBuilder.addService</span><br><span class="line">-&gt; AbstractServerImplBuilder.addService -&gt; 绑定服务</span><br><span class="line"></span><br><span class="line">-&gt; AbstractServerImplBuilder.build</span><br><span class="line">	-&gt; NettyServerBuilder.buildTransportServer -&gt; NettyServer</span><br><span class="line">-&gt; ServerImpl.start</span><br><span class="line">-&gt; NettyServer.start</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">ServerBuilder.class</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> ServerBuilder&lt;?&gt; forPort(<span class="keyword">int</span> port) &#123;</span><br><span class="line">    <span class="keyword">return</span> ServerProvider.provider().builderForPort(port);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">NettyServerProvider.classs</span><br><span class="line"><span class="function"><span class="keyword">protected</span> NettyServerBuilder <span class="title">builderForPort</span><span class="params">(<span class="keyword">int</span> port)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> NettyServerBuilder.forPort(port);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">NettyServerBuilder.class</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> NettyServerBuilder <span class="title">forPort</span><span class="params">(<span class="keyword">int</span> port)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> NettyServerBuilder(port);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">AbstractServerImplBuilder.class</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> T <span class="title">addService</span><span class="params">(ServerServiceDefinition service)</span> </span>&#123;</span><br><span class="line">    registryBuilder.addService(service);</span><br><span class="line">    <span class="keyword">return</span> thisT();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> T <span class="title">addService</span><span class="params">(BindableService bindableService)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (bindableService <span class="keyword">instanceof</span> InternalNotifyOnServerBuild) &#123;</span><br><span class="line">        notifyOnBuildList.add((InternalNotifyOnServerBuild) bindableService);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> addService(bindableService.bindService());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">AbstractServerImplBuilder.class</span><br><span class="line"><span class="function"><span class="keyword">public</span> Server <span class="title">build</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    ServerImpl server = <span class="keyword">new</span> ServerImpl(</span><br><span class="line">            <span class="keyword">this</span>,</span><br><span class="line">            buildTransportServer(Collections.unmodifiableList(getTracerFactories())),</span><br><span class="line">            Context.ROOT);</span><br><span class="line">    <span class="keyword">for</span> (InternalNotifyOnServerBuild notifyTarget : notifyOnBuildList) &#123;</span><br><span class="line">        notifyTarget.notifyOnBuild(server);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> server;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">ServerImpl.class</span><br><span class="line"><span class="function"><span class="keyword">public</span> ServerImpl <span class="title">start</span><span class="params">()</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">    <span class="keyword">synchronized</span> (lock) &#123;</span><br><span class="line">        checkState(!started, <span class="string">"Already started"</span>);</span><br><span class="line">        checkState(!shutdown, <span class="string">"Shutting down"</span>);</span><br><span class="line">        <span class="comment">// Start and wait for any port to actually be bound.</span></span><br><span class="line">        transportServer.start(<span class="keyword">new</span> ServerListenerImpl());</span><br><span class="line">        executor = Preconditions.checkNotNull(executorPool.getObject(), <span class="string">"executor"</span>);</span><br><span class="line">        started = <span class="keyword">true</span>;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>gRPC 服务端创建关键流程分析：</p>
+<p>NettyServer 实例创建：gRPC 服务端创建，首先需要初始化 NettyServer，它是 gRPC 基于 Netty4.1 HTTP/2 协议栈之上封装的 HTTP/2 服务端。NettyServer 实例由 NettyServerBuilder 的 buildTransportServer 方法构建。NettyServer 构建完成之后，监听指定的 Socket 地址，即可实现基于 HTTP/2 协议的请求消息接入。</p>
+<p>绑定 IDL 定义的服务接口实现类：gRPC 与其它一些 RPC 框架的差异点是服务接口实现类的调用并不是通过动态代理和反射机制，而是通过 proto 工具生成代码。在服务端启动时，将服务接口实现类实例注册到 gRPC 内部的服务注册中心上。请求消息接入之后，可以根据服务名和方法名，直接调用启动时注册的服务实例，而不需要通过反射的方式进行调用，性能更优。</p>
+<p>gRPC 服务实例（ServerImpl）构建：ServerImpl 负责整个 gRPC 服务端消息的调度和处理，创建 ServerImpl 实例过程中，会对服务端依赖的对象进行初始化。例如 Netty 的线程池资源、gRPC 的线程池、内部的服务注册类（InternalHandlerRegistry）等。ServerImpl 初始化完成之后，就可以调用 NettyServer 的 start 方法启动 HTTP/2 服务端，接收 gRPC 客户端的服务调用请求。</p>
+</blockquote>
+<h2 id="2-客户端与服务端建立连接流程"><a href="#2-客户端与服务端建立连接流程" class="headerlink" title="2.客户端与服务端建立连接流程"></a>2.客户端与服务端建立连接流程</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">NettyServer.start(ServerListenerImpl.class)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">(ServerListener serverListener)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">    listener = checkNotNull(serverListener, <span class="string">"serverListener"</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// If using the shared groups, get references to them.</span></span><br><span class="line">    allocateSharedGroups();</span><br><span class="line"></span><br><span class="line">    ServerBootstrap b = <span class="keyword">new</span> ServerBootstrap();</span><br><span class="line">    b.group(bossGroup, workerGroup);</span><br><span class="line">    b.channel(channelType);</span><br><span class="line">    <span class="keyword">if</span> (NioServerSocketChannel.class.isAssignableFrom(channelType)) &#123;</span><br><span class="line">        b.option(SO_BACKLOG, <span class="number">128</span>);</span><br><span class="line">        b.childOption(SO_KEEPALIVE, <span class="keyword">true</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (channelOptions != <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">for</span> (Map.Entry&lt;ChannelOption&lt;?&gt;, ?&gt; entry : channelOptions.entrySet()) &#123;</span><br><span class="line">            <span class="meta">@SuppressWarnings</span>(<span class="string">"unchecked"</span>)</span><br><span class="line">            ChannelOption&lt;Object&gt; key = (ChannelOption&lt;Object&gt;) entry.getKey();</span><br><span class="line">            b.childOption(key, entry.getValue());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    b.childHandler(<span class="keyword">new</span> ChannelInitializer&lt;Channel&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">initChannel</span><span class="params">(Channel ch)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">            ChannelPromise channelDone = ch.newPromise();</span><br><span class="line"></span><br><span class="line">            <span class="keyword">long</span> maxConnectionAgeInNanos = NettyServer.<span class="keyword">this</span>.maxConnectionAgeInNanos;</span><br><span class="line">            <span class="keyword">if</span> (maxConnectionAgeInNanos != MAX_CONNECTION_AGE_NANOS_DISABLED) &#123;</span><br><span class="line">                <span class="comment">// apply a random jitter of +/-10% to max connection age</span></span><br><span class="line">                maxConnectionAgeInNanos =</span><br><span class="line">                        (<span class="keyword">long</span>) ((.<span class="number">9</span>D + Math.random() * .<span class="number">2</span>D) * maxConnectionAgeInNanos);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 对于每一个客户端连接, 创建一个NettyServerTransport处理请求</span></span><br><span class="line">            NettyServerTransport transport =</span><br><span class="line">                    <span class="keyword">new</span> NettyServerTransport(</span><br><span class="line">                            ch,</span><br><span class="line">                            channelDone,</span><br><span class="line">                            protocolNegotiator,</span><br><span class="line">                            streamTracerFactories,</span><br><span class="line">                            transportTracerFactory.create(),</span><br><span class="line">                            maxStreamsPerConnection,</span><br><span class="line">                            flowControlWindow,</span><br><span class="line">                            maxMessageSize,</span><br><span class="line">                            maxHeaderListSize,</span><br><span class="line">                            keepAliveTimeInNanos,</span><br><span class="line">                            keepAliveTimeoutInNanos,</span><br><span class="line">                            maxConnectionIdleInNanos,</span><br><span class="line">                            maxConnectionAgeInNanos,</span><br><span class="line">                            maxConnectionAgeGraceInNanos,</span><br><span class="line">                            permitKeepAliveWithoutCalls,</span><br><span class="line">                            permitKeepAliveTimeInNanos);</span><br><span class="line">            ServerTransportListener transportListener;</span><br><span class="line">            <span class="comment">// This is to order callbacks on the listener, not to guard access to channel.</span></span><br><span class="line">            <span class="keyword">synchronized</span> (NettyServer.<span class="keyword">this</span>) &#123;</span><br><span class="line">                <span class="keyword">if</span> (channel != <span class="keyword">null</span> &amp;&amp; !channel.isOpen()) &#123;</span><br><span class="line">                    <span class="comment">// Server already shutdown.</span></span><br><span class="line">                    ch.close();</span><br><span class="line">                    <span class="keyword">return</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// `channel` shutdown can race with `ch` initialization, so this is only safe to increment</span></span><br><span class="line">                <span class="comment">// inside the lock.</span></span><br><span class="line">                eventLoopReferenceCounter.retain();</span><br><span class="line"></span><br><span class="line">                <span class="comment">/**</span></span><br><span class="line"><span class="comment">                 * 回调传入的ServerListener, </span></span><br><span class="line"><span class="comment">                 * 将NettyServerTransport添加到ServerImpl的transports集合中,</span></span><br><span class="line"><span class="comment">                 * 同时生成对应的ServerListenerImpl监听器实例</span></span><br><span class="line"><span class="comment">                 */</span></span><br><span class="line">                transportListener = listener.transportCreated(transport);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">/**</span></span><br><span class="line"><span class="comment">             * Releases the event loop if the channel is "done", possibly due to the channel closing.</span></span><br><span class="line"><span class="comment">             */</span></span><br><span class="line">            <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">LoopReleaser</span> <span class="keyword">implements</span> <span class="title">ChannelFutureListener</span> </span>&#123;</span><br><span class="line">                <span class="keyword">boolean</span> done;</span><br><span class="line"></span><br><span class="line">                <span class="meta">@Override</span></span><br><span class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">operationComplete</span><span class="params">(ChannelFuture future)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">                    <span class="keyword">if</span> (!done) &#123;</span><br><span class="line">                        done = <span class="keyword">true</span>;</span><br><span class="line">                        eventLoopReferenceCounter.release();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            transport.start(transportListener);</span><br><span class="line">            ChannelFutureListener loopReleaser = <span class="keyword">new</span> LoopReleaser();</span><br><span class="line">            channelDone.addListener(loopReleaser);</span><br><span class="line">            ch.closeFuture().addListener(loopReleaser);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="comment">// Bind and start to accept incoming connections.</span></span><br><span class="line">    ChannelFuture future = b.bind(address);</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        future.await();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (InterruptedException ex) &#123;</span><br><span class="line">        Thread.currentThread().interrupt();</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"Interrupted waiting for bind"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (!future.isSuccess()) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IOException(<span class="string">"Failed to bind"</span>, future.cause());</span><br><span class="line">    &#125;</span><br><span class="line">    channel = future.channel();</span><br><span class="line">    Future&lt;?&gt; channelzFuture = channel.eventLoop().submit(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            InternalInstrumented&lt;SocketStats&gt; listenSocket = <span class="keyword">new</span> ListenSocket(channel);</span><br><span class="line">            listenSockets = ImmutableList.of(listenSocket);</span><br><span class="line">            channelz.addListenSocket(listenSocket);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        channelzFuture.await();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (InterruptedException ex) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"Interrupted while registering listen socket to channelz"</span>, ex);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>客户端连接到服务端时, 初始化Channel, 此时创建NettyServerTransport用来处理grpc请求</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">NettyServerTransport.start(ServerTransportListenerImpl.class)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">(ServerTransportListener listener)</span> </span>&#123;</span><br><span class="line">    Preconditions.checkState(<span class="keyword">this</span>.listener == <span class="keyword">null</span>, <span class="string">"Handler already registered"</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// NettyServerStream创建后, 通过该监听器触发streamCreated(), 完成消息上下文和gRPC业务监听器的创建</span></span><br><span class="line">    <span class="keyword">this</span>.listener = listener;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 为pipeline创建NettyServerHandler用于处理GRPC处理,</span></span><br><span class="line">    <span class="comment">// 所有的事件处理器都运行在对应通道处理线程的上下文中</span></span><br><span class="line">    grpcHandler = createHandler(listener, channelUnused);</span><br><span class="line">    NettyHandlerSettings.setAutoWindow(grpcHandler);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Notify when the channel closes.</span></span><br><span class="line">    <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">TerminationNotifier</span> <span class="keyword">implements</span> <span class="title">ChannelFutureListener</span> </span>&#123;</span><br><span class="line">        <span class="keyword">boolean</span> done;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">operationComplete</span><span class="params">(ChannelFuture future)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">            <span class="keyword">if</span> (!done) &#123;</span><br><span class="line">                done = <span class="keyword">true</span>;</span><br><span class="line">                notifyTerminated(grpcHandler.connectionError());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ChannelFutureListener terminationNotifier = <span class="keyword">new</span> TerminationNotifier();</span><br><span class="line">    channelUnused.addListener(terminationNotifier);</span><br><span class="line">    channel.closeFuture().addListener(terminationNotifier);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 将grpcHandler封装进NegotiationHandler用于在进行rpc处理前进行协议转换</span></span><br><span class="line">    ChannelHandler negotiationHandler = protocolNegotiator.newHandler(grpcHandler);</span><br><span class="line">    <span class="comment">// 将Handler添加进channel的pipeline中</span></span><br><span class="line">    channel.pipeline().addLast(negotiationHandler);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="3-客户端调用服务端服务流程"><a href="#3-客户端调用服务端服务流程" class="headerlink" title="3.客户端调用服务端服务流程"></a>3.客户端调用服务端服务流程</h2><p><img src="http://evaxujz-hexo-image.oss-cn-shenzhen.aliyuncs.com/NettyServerHandler%E7%BB%A7%E6%89%BF%E5%85%B3%E7%B3%BB.png" alt="NettyServerHandler继承关系"></p>
+<blockquote>
+<p>gRPC的客户端请求消息由 Netty Http2ConnectionHandler 接入，由 gRPC 负责将 PB 消息（或者 JSON）反序列化为 POJO 对象，然后通过服务定义查询到该消息对应的接口实例，发起本地 Java 接口调用，调用完成之后，将响应消息反序列化为 PB(或者 JSON)，通过 HTTP2 Frame 发送给客户端。</p>
+<p>Netty对于HTTP/2协议栈的支持主要通过Http2ConnectionHandler实现，而gRPC便是在其基础上进行了拓展，通过注册到Netty HTTP/2协议栈中的Http2FrameListener，将解码成功之后的 HTTP Header 和 HTTP Body 发送到 gRPC 的 NettyServerHandler 中，实现基于 HTTP/2 的 RPC 请求消息接入。</p>
+<p>对于消息的编解码都是通过Http2ConnectionHandler实现的，所以后续的流程解析会基于NettyServerHandler的继承关系进行分析。</p>
+</blockquote>
+<h3 id="3-1-gRPC请求消息接入"><a href="#3-1-gRPC请求消息接入" class="headerlink" title="3.1.gRPC请求消息接入"></a>3.1.gRPC请求消息接入</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">ByteToMessageDecoder.channelRead</span><br><span class="line">-&gt; ByteToMessageDecoder.callDecode</span><br><span class="line">-&gt; ByteToMessageDecoder.decodeRemovalReentryProtection</span><br><span class="line">-&gt; Http2ConnectionHandler.decode</span><br><span class="line">-&gt; PrefaceDecoder.decode</span><br><span class="line">-&gt; FrameDecoder.decode</span><br><span class="line">-&gt; DefaultHttp2ConnectionDecoder.decodeFrame &lt;-- 注册FrameReadListener</span><br><span class="line">-&gt; Http2InboundFrameLogger.readFrame</span><br><span class="line">-&gt; DefaultHttp2FrameReader.readFrame</span><br><span class="line">	-&gt; processHeaderState</span><br><span class="line">	-&gt; processPayloadState</span><br><span class="line">-&gt; FrameReadListener.onHeadersRead -&gt; FrameListener.onHeadersRead -&gt; NettyServerHandler.onHeadersRead</span><br><span class="line">-&gt; FrameReadListener.onDataRead -&gt; FrameListener.onDataRead -&gt; NettyServerHandler.onDataRead</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">DefaultHttp2ConnectionDecoder.class</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> Http2FrameListener internalFrameListener = <span class="keyword">new</span> PrefaceFrameListener();</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">decodeFrame</span><span class="params">(ChannelHandlerContext ctx, ByteBuf in, List&lt;Object&gt; out)</span> <span class="keyword">throws</span> Http2Exception </span>&#123;</span><br><span class="line">    frameReader.readFrame(ctx, in, internalFrameListener);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">prefaceReceived</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> FrameReadListener.class == internalFrameListener.getClass();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">PrefaceFrameListener</span> <span class="keyword">implements</span> <span class="title">Http2FrameListener</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Verifies that the HTTP/2 connection preface has been received from the remote endpoint.</span></span><br><span class="line"><span class="comment">     * It is possible that the current call to</span></span><br><span class="line"><span class="comment">     * &#123;<span class="doctag">@link</span> Http2FrameReader#readFrame(ChannelHandlerContext, ByteBuf, Http2FrameListener)&#125; will have multiple</span></span><br><span class="line"><span class="comment">     * frames to dispatch. So it may be OK for this class to get legitimate frames for the first readFrame.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">verifyPrefaceReceived</span><span class="params">()</span> <span class="keyword">throws</span> Http2Exception </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (!prefaceReceived()) &#123;</span><br><span class="line">            <span class="keyword">throw</span> connectionError(PROTOCOL_ERROR, <span class="string">"Received non-SETTINGS as first frame."</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onSettingsRead</span><span class="params">(ChannelHandlerContext ctx, Http2Settings settings)</span> <span class="keyword">throws</span> Http2Exception </span>&#123;</span><br><span class="line">        <span class="comment">// The first settings should change the internalFrameListener to the "real" listener</span></span><br><span class="line">        <span class="comment">// that expects the preface to be verified.</span></span><br><span class="line">        <span class="keyword">if</span> (!prefaceReceived()) &#123;</span><br><span class="line">            <span class="comment">// 在建立连接开始时双方都要发送SETTINGS帧以表明自己期许对方应做的配置,</span></span><br><span class="line">            <span class="comment">// 当SETTINGS帧被读取时触发此方法, 此时internalFrameListener被重新设置为FrameReadListener</span></span><br><span class="line">            internalFrameListener = <span class="keyword">new</span> FrameReadListener();</span><br><span class="line">        &#125;</span><br><span class="line">        internalFrameListener.onSettingsRead(ctx, settings);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">NettyServerHandler.class</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="title">NettyServerHandler</span><span class="params">(...)</span> </span>&#123;</span><br><span class="line">	...</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 在解码器上设置FrameListener监听器</span></span><br><span class="line">	decoder().frameListener(<span class="keyword">new</span> FrameListener());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>关键流程解读如下：</p>
+<p>Netty4.1 提供了 HTTP/2 底层协议栈，通过 Http2ConnectionHandler 及其依赖的其它类库，实现了 HTTP/2 消息的统一接入和处理。通过注册 Http2FrameListener 监听器，可以回调接收 HTTP2 协议的消息头、消息体、优先级、Ping、SETTINGS 等。gRPC 通过 FrameListener 重载 Http2FrameListener 的 onDataRead、onHeadersRead 等方法，将 Netty 的 HTTP/2 消息转发到 gRPC 的 NettyServerHandler 中。</p>
+<p>Netty 的 HTTP/2 协议接入仍然是通过 ChannelHandler 的 CodeC 机制实现，它并不影响 NIO 线程模型。因此，理论上各种协议、以及同一个协议的多个服务端实例可以共用同一个 NIO 线程池（NioEventLoopGroup）, 也可以独占。在实践中独占模式普遍会存在线程资源占用过载问题，很容易出现句柄等资源泄漏。在 gRPC 中，为了避免该问题，默认采用共享池模式创建 NioEventLoopGroup，所有的 gRPC 服务端实例，都统一从 SharedResourceHolder 分配 NioEventLoopGroup 资源，实现 NioEventLoopGroup 的共享。</p>
+</blockquote>
+<h3 id="3-2-gRPC消息头和消息体处理"><a href="#3-2-gRPC消息头和消息体处理" class="headerlink" title="3.2.gRPC消息头和消息体处理"></a>3.2.gRPC消息头和消息体处理</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">请求头处理</span><br><span class="line"></span><br><span class="line">NettyServerHandler.onHeadersRead</span><br><span class="line">	-&gt; Utils.convertHeaders</span><br><span class="line">	-&gt; <span class="keyword">new</span> NettyServerStream.TransportState</span><br><span class="line">	-&gt; <span class="keyword">new</span> NettyServerStream</span><br><span class="line">-&gt; ServerTransportListenerImpl.streamCreated</span><br><span class="line">	-&gt; ServerTransportListenerImpl.createContext</span><br><span class="line">	-&gt; <span class="keyword">new</span> JumpToApplicationThreadServerStreamListener</span><br><span class="line">	-&gt; NettyServerStream.setListener(JumpToApplicationThreadServerStreamListener.class)</span><br><span class="line">-&gt; Executor.execute(StreamCreated.class) &lt;- 线程切换, 异步处理</span><br><span class="line">-&gt; HandlerRegistry.lookupMethod &lt;- 获取gRPC方法的ServerMethodDefinition</span><br><span class="line">-&gt; ServerTransportListenerImpl.startCall</span><br><span class="line">	-&gt; InternalServerInterceptors.interceptCallHandler &lt;- 拦截器处理</span><br><span class="line">	-&gt; ServerTransportListenerImpl.startWrappedCall</span><br><span class="line">	-&gt; ServerMethodDefinition.getServerCallHandler.startCall &lt;- 通过返回的服务调用监听器, 可以调用本地实现的RPC方法</span><br><span class="line">	-&gt; ServerCallImpl.request</span><br><span class="line">	-&gt; AbstractServerStream.request</span><br><span class="line">	-&gt; NettyServerStream.Sink.request</span><br><span class="line">	-&gt; AbstractStream.TransportState.requestMessagesFromDeframer</span><br><span class="line">	-&gt; MessageDeframer.request</span><br><span class="line">	-&gt; MessageDeframer.deliver</span><br><span class="line">-&gt; ServerCallImpl.newServerStreamListener &lt;- 封装上一步返回的监听器</span><br><span class="line">-&gt; JumpToApplicationThreadServerStreamListener.setListener &lt;- 注册服务流监听器</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>关键流程解读如下：</p>
+<p>对 HTTP Header 的 Content-Type 校验，此处必须是“application/grpc”；</p>
+<p>从 HTTP Header 的 URL 中提取接口和方法名；</p>
+<p>将 Netty 的 HTTP Header 转换成 gRPC 内部的 Metadata，Metadata 内部维护了一个键值对的二维数组 namesAndValues，以及一系列的类型转换方法：</p>
+<p>创建 NettyServerStream 对象，它持有了 Sink 和 TransportState 类，负责将消息封装成 GrpcFrameCommand，与底层 Netty 进行交互，实现协议消息的处理。</p>
+<p>创建 NettyServerStream 之后，会触发 ServerTransportListener 的 streamCreated 方法，在该方法中，主要完成了消息上下文和 gRPC 业务监听器的创建。</p>
+<p>gRPC 上下文创建：CancellableContext 创建之后，支持超时取消。如果 gRPC 客户端请求消息在 Http Header 中携带了“grpc-timeout”，系统在创建 CancellableContext 的同时会启动一个延时定时任务，延时周期为超时时间，一旦该定时器成功执行，就会调用 CancellableContext.CancellationListener 的 cancel 方法，发送 CancelServerStreamCommand 指令。</p>
+<p>JumpToApplicationThreadServerStreamListener 的创建：它是 ServerImpl 的内部类，从命名上基本可以看出它的用途，即从 ServerStream 跳转到应用线程中进行服务调用。gRPC 服务端的接口调用主要通过 JumpToApplicationThreadServerStreamListener 的 messageRead 和 halfClosed 方法完成。</p>
+<p>将 NettyServerStream 的 TransportState 缓存到 Netty 的 Http2Stream 中；当处理请求消息体时，可以根据 streamId 获取到 Http2Stream，进而根据“streamKey”还原 NettyServerStream 的 TransportState，进行后续处理。</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">请求体处理  NettyServerStream.TransportState.setListenter</span><br><span class="line"></span><br><span class="line">NettyServerHandler.onDataRead(endOfStream = <span class="keyword">false</span>)</span><br><span class="line">-&gt; NettyServerStream.TransportState.inboundDataReceived</span><br><span class="line">-&gt; AbstractServerStream.TransportState.inboundDataReceived</span><br><span class="line">-&gt; AbstractServerStream.TransportState.deframe</span><br><span class="line">-&gt; MessageDeframer.deframe</span><br><span class="line">-&gt; MessageDeframer.deliver</span><br><span class="line"></span><br><span class="line">-&gt; NettyServerHandler.onDataRead(endOfStream = <span class="keyword">true</span>)</span><br><span class="line">-&gt; NettyServerStream.TransportState.inboundDataReceived</span><br><span class="line">-&gt; AbstractServerStream.TransportState.inboundDataReceived</span><br><span class="line">-&gt; AbstractStream.TransportState.deframe</span><br><span class="line">-&gt; MessageDeframer.deframe</span><br><span class="line">-&gt; MessageDeframer.deliver</span><br><span class="line">-&gt; AbstractStream.closeDeframer</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>关键流程解读如下：</p>
+<p>因为 Netty HTTP/2 协议 Http2FrameListener 分别提供了 onDataRead 和 onHeadersRead 回调方法，所以 gRPC NettyServerHandler 在处理完消息头之后需要缓存上下文，以便后续处理消息体时使用。</p>
+<p>onDataRead 和 onHeadersRead 方法都是由 Netty 的 NIO 线程负责调度，但是在执行 onDataRead 的过程中发生了线程切换。</p>
+</blockquote>
+<h3 id="3-3-gRPC服务路由与调用"><a href="#3-3-gRPC服务路由与调用" class="headerlink" title="3.3.gRPC服务路由与调用"></a>3.3.gRPC服务路由与调用</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">-&gt; MessageDeframer.deliver</span><br><span class="line">	-&gt; MessageDeframer.processHeader</span><br><span class="line">	-&gt; MessageDeframer.processBody</span><br><span class="line">-&gt; AbstractStream.TransportState.messagesAvailable</span><br><span class="line">-&gt; JumpToApplicationThreadServerStreamListener.messagesAvailable</span><br><span class="line">-&gt; Executor.execute(ServerStreamListener.messagesAvailable) &lt;- 线程切换, 异步处理, 通过该监听器调用本地RPC方法</span><br><span class="line">-&gt; ServerStreamListenerImpl.messagesAvailable</span><br><span class="line">-&gt; ServerCall.Listener.onMessage</span><br><span class="line"></span><br><span class="line">-&gt; MessageDeframer.closeWhenComplete</span><br><span class="line">-&gt; MessageDeframer.close</span><br><span class="line">-&gt; AbstractServerStream.TransportState.deframerClosed</span><br><span class="line">-&gt; JumpToApplicationThreadServerStreamListener.halfClosed &lt;- 线程切换, 异步处理, 通过该监听器调用本地RPC方法</span><br><span class="line">-&gt; ServerCall.Listener.onHalfClose</span><br><span class="line">-&gt; UnaryRequestMethod.invoke / StreamingRequestMethod.invoke</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">AbstractStream.TransportState.class</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">messagesAvailable</span><span class="params">(StreamListener.MessageProducer producer)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 获取监听器回调messagesAvailable()</span></span><br><span class="line">    listener().messagesAvailable(producer);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">AbstractServerStream.class</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">setListener</span><span class="params">(ServerStreamListener serverStreamListener)</span> </span>&#123;</span><br><span class="line">    transportState().setListener(serverStreamListener);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">ServerTransportListenerImpl.class</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">streamCreated</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">	<span class="keyword">final</span> ServerStream stream, <span class="keyword">final</span> String methodName, <span class="keyword">final</span> Metadata headers)</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 注册JumpToApplicationThreadServerStreamListener到NettyServerStream, </span></span><br><span class="line">    <span class="comment">// 实际上是将监听器注册到NettyServerStream.TransportState</span></span><br><span class="line">    stream.setListener(jumpListener);</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>关键流程解读如下：</p>
+<p>解码：对 HTTP/2 Body 进行应用层解码，转换成服务端接口的请求参数。解码的关键就是调用 requestMarshaller.parse(input)，将 PB 码流转换成 Java 对象。</p>
+<p>路由：根据 URL 中的方法名从内部服务注册中心查询到对应的服务实例。路由的关键是调用 registry.lookupMethod(methodName) 获取到 ServerMethodDefinition 对象。</p>
+<p>调用：调用服务端接口实现类的指定方法，实现 RPC 调用。与一些 RPC 框架不同的是，此处调用是 Java 本地接口调用，非反射调用，性能更优，它的实现关键是 UnaryRequestMethod.invoke(request, responseObserver) 方法。</p>
+</blockquote>
+<h3 id="3-4-gRPC响应消息发送"><a href="#3-4-gRPC响应消息发送" class="headerlink" title="3.4.gRPC响应消息发送"></a>3.4.gRPC响应消息发送</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">ServerCallStreamObserverImpl.onNext</span><br><span class="line">-&gt; ServerCallImpl.sendHeaders</span><br><span class="line">-&gt; AbstractServerStream.writeHeaders</span><br><span class="line">-&gt; NettyServerStream.Sink.writeHeaders</span><br><span class="line">-&gt; WriteQueue.enqueue()</span><br><span class="line">-&gt; DefaultHttp2ConnectionEncoder.writeData</span><br><span class="line">-&gt; ServerCallImpl.sendMessage</span><br><span class="line">-&gt; AbstractStream.writeMessage</span><br><span class="line">-&gt; MessageFramer.writePayload</span><br><span class="line">-&gt; AbstractServerStream.deliverFrame</span><br><span class="line">-&gt; NettyServerStream.Sink.writeFrame</span><br><span class="line">-&gt; WriteQueue.enqueue()</span><br><span class="line">-&gt; DefaultHttp2ConnectionEncoder.writeData</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>需要说明的是，响应消息的发送由调用服务端接口的应用线程执行，在本示例中，由 SerializingExecutor 进行调用。当请求消息头被封装成 SendResponseHeadersCommand 并被插入到 WriteQueue 之后，后续操作由 Netty 的 NIO 线程 NioEventLoop 负责处理。应用线程继续发送响应消息体，将其封装成 SendGrpcFrameCommand 并插入到 WriteQueue 队列中，由 Netty 的 NIO 线程 NioEventLoop 处理。响应消息的发送严格按照顺序：即先消息头，后消息体。</p>
+</blockquote>
+<h3 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h3><ul>
+<li><a href="http://jiangew.me/grpc-01/" target="_blank" rel="noopener">深入浅出 gRPC 01：gRPC 服务端创建和调用原理</a></li>
+<li><a href="http://www.iigrowing.cn/grpc_shi_shen_me.html" target="_blank" rel="noopener">gRPC是什么</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/gRPC/" rel="tag"># gRPC</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/03/11/netty - A brief introduction with a simple demo/" rel="next" title="netty-简单的介绍与使用">
+                <i class="fa fa-chevron-left"></i> netty-简单的介绍与使用
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/05/05/gRPC - Analysis the SerializingExecutor/" rel="prev" title="gRPC - SerializingExecutor解析">
+                gRPC - SerializingExecutor解析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Evan Xu</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">17</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-gRPC服务端创建流程"><span class="nav-number">1.</span> <span class="nav-text">1.gRPC服务端创建流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-客户端与服务端建立连接流程"><span class="nav-number">2.</span> <span class="nav-text">2.客户端与服务端建立连接流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-客户端调用服务端服务流程"><span class="nav-number">3.</span> <span class="nav-text">3.客户端调用服务端服务流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-gRPC请求消息接入"><span class="nav-number">3.1.</span> <span class="nav-text">3.1.gRPC请求消息接入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-gRPC消息头和消息体处理"><span class="nav-number">3.2.</span> <span class="nav-text">3.2.gRPC消息头和消息体处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-gRPC服务路由与调用"><span class="nav-number">3.3.</span> <span class="nav-text">3.3.gRPC服务路由与调用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-4-gRPC响应消息发送"><span class="nav-number">3.4.</span> <span class="nav-text">3.4.gRPC响应消息发送</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考文章"><span class="nav-number">3.5.</span> <span class="nav-text">参考文章</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Evan Xu</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
