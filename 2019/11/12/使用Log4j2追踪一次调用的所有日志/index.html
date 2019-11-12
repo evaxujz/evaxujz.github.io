@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Log4j2," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="使用Log4j2追踪一次调用的所有日志ThreadContext Fish TaggingMost real-world systems have to deal with multiple clients simultaneously. In a typical multithreaded implementation of such a system, different threads wi">
+<meta name="keywords" content="Log4j2">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Use Log4j2 to trace the procedure for a request">
+<meta property="og:url" content="http://www.evanxu.info/2019/11/12/使用Log4j2追踪一次调用的所有日志/index.html">
+<meta property="og:site_name" content="evanxu.blog">
+<meta property="og:description" content="使用Log4j2追踪一次调用的所有日志ThreadContext Fish TaggingMost real-world systems have to deal with multiple clients simultaneously. In a typical multithreaded implementation of such a system, different threads wi">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2019-11-12T10:55:12.560Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Use Log4j2 to trace the procedure for a request">
+<meta name="twitter:description" content="使用Log4j2追踪一次调用的所有日志ThreadContext Fish TaggingMost real-world systems have to deal with multiple clients simultaneously. In a typical multithreaded implementation of such a system, different threads wi">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://www.evanxu.info/2019/11/12/使用Log4j2追踪一次调用的所有日志/"/>
+
+
+
+
+
+  <title>Use Log4j2 to trace the procedure for a request | evanxu.blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">evanxu.blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://www.evanxu.info/2019/11/12/使用Log4j2追踪一次调用的所有日志/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Evan Xu">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="evanxu.blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Use Log4j2 to trace the procedure for a request</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-11-12T19:00:00+08:00">
+                2019-11-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="使用Log4j2追踪一次调用的所有日志"><a href="#使用Log4j2追踪一次调用的所有日志" class="headerlink" title="使用Log4j2追踪一次调用的所有日志"></a>使用Log4j2追踪一次调用的所有日志</h1><h2 id="ThreadContext"><a href="#ThreadContext" class="headerlink" title="ThreadContext"></a>ThreadContext</h2><blockquote>
+<h4 id="Fish-Tagging"><a href="#Fish-Tagging" class="headerlink" title="Fish Tagging"></a>Fish Tagging</h4><p>Most real-world systems have to deal with multiple clients simultaneously. In a typical multithreaded implementation of such a system, different threads will handle different clients. Logging is especially well suited to trace and debug complex distributed applications. A common approach to differentiate the logging output of one client from another is to instantiate a new separate logger for each client. This promotes the proliferation of loggers and increases the management overhead of logging.</p>
+<p>A lighter technique is to uniquely stamp each log request initiated from the same client interaction. Neil Harrison described this method in the book “Patterns for Logging Diagnostic Messages,” in <em>Pattern Languages of Program Design 3</em>, edited by R. Martin, D. Riehle, and F. Buschmann (Addison-Wesley, 1997). Just as a fish can be tagged and have its movement tracked, stamping log events with a common tag or set of data elements allows the complete flow of a transaction or a request to be tracked. We call this <em>Fish Tagging</em>.</p>
+<p>Log4j provides two mechanisms for performing Fish Tagging; the Thread Context Map and the Thread Context Stack. The Thread Context Map allows any number of items to be added and be identified using key/value pairs. The Thread Context Stack allows one or more items to be pushed on the Stack and then be identified by their order in the Stack or by the data itself. Since key/value pairs are more flexible, the Thread Context Map is recommended when data items may be added during the processing of the request or when there are more than one or two items.</p>
+<h4 id="Implementation-details"><a href="#Implementation-details" class="headerlink" title="Implementation details"></a>Implementation details</h4><p>The Stack and the Map are managed per thread and are based on <a href="http://docs.oracle.com/javase/6/docs/api/java/lang/ThreadLocal.html" target="_blank" rel="noopener">ThreadLocal</a> by default. The Map can be configured to use an <a href="http://docs.oracle.com/javase/6/docs/api/java/lang/InheritableThreadLocal.html" target="_blank" rel="noopener">InheritableThreadLocal</a> by setting system property <code>log4j2.isThreadContextMapInheritable</code> to <code>true</code>. When configured this way, the contents of the Map will be passed to child threads.</p>
+</blockquote>
+<p>实现上, ThreadContext借助了ThreadLocal来保存标记, 使得在相同线程工作下的日志都能够获取到标记, 并记录到日志上, 对于一般的web应用来说, 如果请求的处理全程都是在一个线程上进行的, 则可以通过该标记来关联一次请求的所有日志, 但是对于涉及到线程池使用的情况, ThreadContext并不能将标记传递到工作线程内, 所以需要通过其他手段来将标记传入工作线程.</p>
+<h2 id="工程配置"><a href="#工程配置" class="headerlink" title="工程配置"></a>工程配置</h2><h3 id="添加依赖"><a href="#添加依赖" class="headerlink" title="添加依赖"></a>添加依赖</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">	<span class="comment">&lt;!-- log4j2 --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.logging.log4j<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>log4j-api<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.9.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.logging.log4j<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>log4j-core<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.9.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- log4j2与slf4j的桥接包 --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.logging.log4j<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>log4j-slf4j-impl<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.9.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- slf4j核心包--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.slf4j<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>slf4j-api<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.7.25<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="log4j2-xml配置文件"><a href="#log4j2-xml配置文件" class="headerlink" title="log4j2.xml配置文件"></a>log4j2.xml配置文件</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span><br><span class="line"><span class="tag">&lt;<span class="name">Configuration</span> <span class="attr">status</span>=<span class="string">"INFO"</span> <span class="attr">monitorInterval</span>=<span class="string">"5"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">Appenders</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Console</span> <span class="attr">name</span>=<span class="string">"console"</span> <span class="attr">target</span>=<span class="string">"SYSTEM_OUT"</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!-- 使用%X&#123;key&#125;来获取ThreadContextMap中指定key的值 --&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">PatternLayout</span> <span class="attr">pattern</span>=<span class="string">"%d&#123;HH:mm:ss.SSS&#125; [%t] [requestID = %X&#123;requestID&#125;] %-5level %logger&#123;36&#125; - %msg%n"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">Console</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Appenders</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">Loggers</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Root</span> <span class="attr">level</span>=<span class="string">"DEBUG"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">AppenderRef</span> <span class="attr">ref</span>=<span class="string">"console"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">Root</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Loggers</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Configuration</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="ThreadContext的使用"><a href="#ThreadContext的使用" class="headerlink" title="ThreadContext的使用"></a>ThreadContext的使用</h2><h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LogDemo</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Logger logger = LoggerFactory.getLogger(LogDemo.class);</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        LogDemo logDemo = <span class="keyword">new</span> LogDemo();</span><br><span class="line"></span><br><span class="line">        logger.info(<span class="string">"log before put 'requestID' to ThreadContext"</span>);</span><br><span class="line"></span><br><span class="line">        ThreadContext.put(<span class="string">"requestID"</span>, <span class="string">"requestId-201905151503"</span>);</span><br><span class="line">        logger.info(<span class="string">"log before handle request"</span>);</span><br><span class="line">        logDemo.handleRequest();</span><br><span class="line">        logger.info(<span class="string">"log after handle request"</span>);</span><br><span class="line">        ThreadContext.clearAll();</span><br><span class="line"></span><br><span class="line">        logger.info(<span class="string">"log after clear the ThreadContext"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleRequest</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        logger.info(<span class="string">"log when handle request"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="运行结果"><a href="#运行结果" class="headerlink" title="运行结果"></a>运行结果</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">15:07:46.884 [main] [requestID = ] INFO  com.xujz.LogDemo - log before put &apos;requestID&apos; to ThreadContext</span><br><span class="line">15:07:46.886 [main] [requestID = requestId-201905151503] INFO  com.xujz.LogDemo - log before handle request</span><br><span class="line">15:07:46.886 [main] [requestID = requestId-201905151503] INFO  com.xujz.LogDemo - log when handle request</span><br><span class="line">15:07:46.886 [main] [requestID = requestId-201905151503] INFO  com.xujz.LogDemo - log after handle request</span><br><span class="line">15:07:46.886 [main] [requestID = ] INFO  com.xujz.LogDemo - log after clear the ThreadContext</span><br></pre></td></tr></table></figure>
+<h2 id="CloseableThreadContext的使用"><a href="#CloseableThreadContext的使用" class="headerlink" title="CloseableThreadContext的使用"></a>CloseableThreadContext的使用</h2><blockquote>
+<p>将标记记录到ThreadContext后必须在适当的时候清楚, 为了帮助解决这个问题, CloseableThreadContext实现了AutoCloseable接口, 可以使用Java7支持的try-with-resource功能在代码执行结束后自动清楚标记</p>
+</blockquote>
+<h3 id="代码-1"><a href="#代码-1" class="headerlink" title="代码"></a>代码</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LogDemo</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Logger logger = LoggerFactory.getLogger(LogDemo.class);</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        LogDemo logDemo = <span class="keyword">new</span> LogDemo();</span><br><span class="line"></span><br><span class="line">        logger.info(<span class="string">"log before put 'requestID' to ThreadContext"</span>);</span><br><span class="line">        <span class="keyword">try</span> (<span class="keyword">final</span> CloseableThreadContext.Instance ctc</span><br><span class="line">                = CloseableThreadContext.put(<span class="string">"requestID"</span>, <span class="string">"requestId-201905151503"</span>)) &#123;</span><br><span class="line">            logger.info(<span class="string">"log before handle request"</span>);</span><br><span class="line">            logDemo.handleRequest();</span><br><span class="line">            logger.info(<span class="string">"log after handle request"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        logger.info(<span class="string">"log after clear the ThreadContext"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleRequest</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        logger.info(<span class="string">"log when handle request"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="运行结果-1"><a href="#运行结果-1" class="headerlink" title="运行结果"></a>运行结果</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">15:13:56.861 [main] [requestID = ] INFO  com.xujz.LogDemo - log before put &apos;requestID&apos; to ThreadContext</span><br><span class="line">15:13:56.864 [main] [requestID = requestId-201905151503] INFO  com.xujz.LogDemo - log before handle request</span><br><span class="line">15:13:56.864 [main] [requestID = requestId-201905151503] INFO  com.xujz.LogDemo - log when handle request</span><br><span class="line">15:13:56.864 [main] [requestID = requestId-201905151503] INFO  com.xujz.LogDemo - log after handle request</span><br><span class="line">15:13:56.865 [main] [requestID = ] INFO  com.xujz.LogDemo - log after clear the ThreadContext</span><br></pre></td></tr></table></figure>
+<h2 id="使用线程池情况下的标记添加"><a href="#使用线程池情况下的标记添加" class="headerlink" title="使用线程池情况下的标记添加"></a>使用线程池情况下的标记添加</h2><blockquote>
+<p>However, as discussed in the <a href="http://docs.oracle.com/javase/6/docs/api/java/util/concurrent/Executors.html#privilegedThreadFactory(" target="_blank" rel="noopener">Executors</a>) class and in other cases where thread pooling is utilized, the ThreadContext may not always be automatically passed to worker threads. In those cases the pooling mechanism should provide a means for doing so. The getContext() and cloneStack() methods can be used to obtain copies of the Map and Stack respectively.</p>
+</blockquote>
+<p>由于ThreadContext是借助ThreadLocal实现的, 所以没有办法处理使用线程池情况下的标记添加, 这时候便需要自己实现将任务提交线程的ThreadLocal传递到任务执行线程中的工作.</p>
+<h3 id="扩展Runnable"><a href="#扩展Runnable" class="headerlink" title="扩展Runnable"></a>扩展Runnable</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ThreadContextRunnable</span> <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Runnable runnable;</span><br><span class="line">    <span class="keyword">private</span> Map&lt;String, String&gt; context;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ThreadContextRunnable</span><span class="params">(Runnable runnable)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.runnable = runnable;</span><br><span class="line">        <span class="keyword">this</span>.context = ThreadContext.getContext();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> (<span class="keyword">final</span> CloseableThreadContext.Instance ctc = CloseableThreadContext.putAll(context)) &#123;</span><br><span class="line">            runnable.run();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="使用Runnable提交任务时"><a href="#使用Runnable提交任务时" class="headerlink" title="使用Runnable提交任务时"></a>使用Runnable提交任务时</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LogDemo</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Logger logger = LoggerFactory.getLogger(LogDemo.class);</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Executor executor = Executors.newFixedThreadPool(<span class="number">10</span>);</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        LogDemo logDemo = <span class="keyword">new</span> LogDemo();</span><br><span class="line"></span><br><span class="line">        logger.info(<span class="string">"log before put 'requestID' to ThreadContext"</span>);</span><br><span class="line">        <span class="keyword">try</span> (<span class="keyword">final</span> CloseableThreadContext.Instance ctc</span><br><span class="line">                = CloseableThreadContext.put(<span class="string">"requestID"</span>, <span class="string">"requestId-201905151503"</span>)) &#123;</span><br><span class="line">            logger.info(<span class="string">"log before handle request"</span>);</span><br><span class="line">            logDemo.handleRequest();</span><br><span class="line">            logger.info(<span class="string">"log after handle request"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        logger.info(<span class="string">"log after clear the ThreadContext"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleRequest</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        logger.info(<span class="string">"log when handle request"</span>);</span><br><span class="line">        executor.execute(() -&gt; &#123;</span><br><span class="line">            logger.info(<span class="string">"log when run in a thread pool"</span>);</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="运行结果-2"><a href="#运行结果-2" class="headerlink" title="运行结果"></a>运行结果</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">16:16:30.212 [main] [requestID = ] INFO  com.xujz.LogDemo - log before put &apos;requestID&apos; to ThreadContext</span><br><span class="line">16:16:30.215 [main] [requestID = requestId-201905151503] INFO  com.xujz.LogDemo - log before handle request</span><br><span class="line">16:16:30.215 [main] [requestID = requestId-201905151503] INFO  com.xujz.LogDemo - log when handle request</span><br><span class="line">16:16:30.243 [main] [requestID = requestId-201905151503] INFO  com.xujz.LogDemo - log after handle request</span><br><span class="line">16:16:30.243 [main] [requestID = ] INFO  com.xujz.LogDemo - log after clear the ThreadContext</span><br><span class="line">16:16:30.243 [pool-2-thread-1] [requestID = ] INFO  com.xujz.LogDemo - log when run in a thread pool</span><br></pre></td></tr></table></figure>
+<h3 id="使用ThreadContextRunnable提交任务时"><a href="#使用ThreadContextRunnable提交任务时" class="headerlink" title="使用ThreadContextRunnable提交任务时"></a>使用ThreadContextRunnable提交任务时</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LogDemo</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Logger logger = LoggerFactory.getLogger(LogDemo.class);</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Executor executor = Executors.newFixedThreadPool(<span class="number">10</span>);</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        LogDemo logDemo = <span class="keyword">new</span> LogDemo();</span><br><span class="line"></span><br><span class="line">        logger.info(<span class="string">"log before put 'requestID' to ThreadContext"</span>);</span><br><span class="line">        <span class="keyword">try</span> (<span class="keyword">final</span> CloseableThreadContext.Instance ctc</span><br><span class="line">                = CloseableThreadContext.put(<span class="string">"requestID"</span>, <span class="string">"requestId-201905151503"</span>)) &#123;</span><br><span class="line">            logger.info(<span class="string">"log before handle request"</span>);</span><br><span class="line">            logDemo.handleRequest();</span><br><span class="line">            logger.info(<span class="string">"log after handle request"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        logger.info(<span class="string">"log after clear the ThreadContext"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleRequest</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        logger.info(<span class="string">"log when handle request"</span>);</span><br><span class="line">        executor.execute(<span class="keyword">new</span> ThreadContextRunnable(() -&gt; &#123;</span><br><span class="line">            logger.info(<span class="string">"log when run in a thread pool"</span>);</span><br><span class="line">        &#125;));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="运行结果-3"><a href="#运行结果-3" class="headerlink" title="运行结果"></a>运行结果</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">16:17:30.795 [main] [requestID = ] INFO  com.xujz.LogDemo - log before put &apos;requestID&apos; to ThreadContext</span><br><span class="line">16:17:30.797 [main] [requestID = requestId-201905151503] INFO  com.xujz.LogDemo - log before handle request</span><br><span class="line">16:17:30.797 [main] [requestID = requestId-201905151503] INFO  com.xujz.LogDemo - log when handle request</span><br><span class="line">16:17:30.826 [main] [requestID = requestId-201905151503] INFO  com.xujz.LogDemo - log after handle request</span><br><span class="line">16:17:30.827 [main] [requestID = ] INFO  com.xujz.LogDemo - log after clear the ThreadContext</span><br><span class="line">16:17:30.827 [pool-2-thread-1] [requestID = requestId-201905151503] INFO  com.xujz.LogDemo - log when run in a thread pool</span><br></pre></td></tr></table></figure>
+<h2 id="使用transmittable-thread-local与log4j2-ttl-thread-context-map完成标记添加"><a href="#使用transmittable-thread-local与log4j2-ttl-thread-context-map完成标记添加" class="headerlink" title="使用transmittable-thread-local与log4j2-ttl-thread-context-map完成标记添加"></a>使用transmittable-thread-local与log4j2-ttl-thread-context-map完成标记添加</h2><p>针对使用线程池等池化复用线程的组件, ThreadLocal值无法传递的情况, Alibaba提供了组件<a href="https://github.com/alibaba/transmittable-thread-local" target="_blank" rel="noopener">Transmittable ThreadLocal(TTL)</a>用于解决异步执行时上下文传递的问题.</p>
+<p>Log4j2提供的ThreadContext默认是使用ThreadLocal / InheritableThreadLocal类来存储上下文信息, 无法直接集成<a href="https://github.com/alibaba/transmittable-thread-local" target="_blank" rel="noopener">Transmittable ThreadLocal(TTL)</a>带来的异步执行上下文传递的功能, 所以<a href="https://github.com/alibaba/transmittable-thread-local" target="_blank" rel="noopener">Transmittable ThreadLocal(TTL)</a>的作者又提供了<a href="https://github.com/oldratlee/log4j2-ttl-thread-context-map" target="_blank" rel="noopener">log4j2-ttl-thread-context-map</a>这个组件替换掉ThreadContext内部使用的ThreadContextMap的实现以此来使用<a href="https://github.com/alibaba/transmittable-thread-local" target="_blank" rel="noopener">Transmittable ThreadLocal(TTL)</a>的增强功能.</p>
+<h3 id="添加依赖-1"><a href="#添加依赖-1" class="headerlink" title="添加依赖"></a>添加依赖</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- log4j2-ttl-thread-context-map依赖了transmittable-thread-local--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.alibaba<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>log4j2-ttl-thread-context-map<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.2.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">scope</span>&gt;</span>runtime<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="使用TtlRunnable提交任务"><a href="#使用TtlRunnable提交任务" class="headerlink" title="使用TtlRunnable提交任务"></a>使用TtlRunnable提交任务</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LogDemo</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Logger logger = LoggerFactory.getLogger(LogDemo.class);</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Executor executor = Executors.newFixedThreadPool(<span class="number">10</span>);</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        LogDemo logDemo = <span class="keyword">new</span> LogDemo();</span><br><span class="line"></span><br><span class="line">        logger.info(<span class="string">"log before put 'requestID' to ThreadContext"</span>);</span><br><span class="line">        <span class="keyword">try</span> (<span class="keyword">final</span> CloseableThreadContext.Instance ctc</span><br><span class="line">                = CloseableThreadContext.put(<span class="string">"requestID"</span>, <span class="string">"requestId-201905151503"</span>)) &#123;</span><br><span class="line">            logger.info(<span class="string">"log before handle request"</span>);</span><br><span class="line">            logDemo.handleRequest();</span><br><span class="line">            logger.info(<span class="string">"log after handle request"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        logger.info(<span class="string">"log after clear the ThreadContext"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleRequest</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        logger.info(<span class="string">"log when handle request"</span>);</span><br><span class="line">        executor.execute(TtlRunnable.get(() -&gt; &#123;</span><br><span class="line">            logger.info(<span class="string">"log when run in a thread pool"</span>);</span><br><span class="line">        &#125;));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="运行结果-4"><a href="#运行结果-4" class="headerlink" title="运行结果"></a>运行结果</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">16:49:49.557 [main] [requestID = ] INFO  com.xujz.LogDemo - log before put &apos;requestID&apos; to ThreadContext</span><br><span class="line">16:49:49.560 [main] [requestID = requestId-201905151503] INFO  com.xujz.LogDemo - log before handle request</span><br><span class="line">16:49:49.560 [main] [requestID = requestId-201905151503] INFO  com.xujz.LogDemo - log when handle request</span><br><span class="line">16:49:49.589 [main] [requestID = requestId-201905151503] INFO  com.xujz.LogDemo - log after handle request</span><br><span class="line">16:49:49.589 [pool-2-thread-1] [requestID = requestId-201905151503] INFO  com.xujz.LogDemo - log when run in a thread pool</span><br><span class="line">16:49:49.589 [main] [requestID = ] INFO  com.xujz.LogDemo - log after clear the ThreadContext</span><br></pre></td></tr></table></figure>
+<h3 id="使用TtlExecutor线程池处理任务"><a href="#使用TtlExecutor线程池处理任务" class="headerlink" title="使用TtlExecutor线程池处理任务"></a>使用TtlExecutor线程池处理任务</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LogDemo</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Logger logger = LoggerFactory.getLogger(LogDemo.class);</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Executor executor = TtlExecutors.getTtlExecutor(Executors.newFixedThreadPool(<span class="number">10</span>));</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        LogDemo logDemo = <span class="keyword">new</span> LogDemo();</span><br><span class="line"></span><br><span class="line">        logger.info(<span class="string">"log before put 'requestID' to ThreadContext"</span>);</span><br><span class="line">        <span class="keyword">try</span> (<span class="keyword">final</span> CloseableThreadContext.Instance ctc</span><br><span class="line">                = CloseableThreadContext.put(<span class="string">"requestID"</span>, <span class="string">"requestId-201905151503"</span>)) &#123;</span><br><span class="line">            logger.info(<span class="string">"log before handle request"</span>);</span><br><span class="line">            logDemo.handleRequest();</span><br><span class="line">            logger.info(<span class="string">"log after handle request"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        logger.info(<span class="string">"log after clear the ThreadContext"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleRequest</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        logger.info(<span class="string">"log when handle request"</span>);</span><br><span class="line">        executor.execute(() -&gt; logger.info(<span class="string">"log when run in a thread pool"</span>));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="运行结果-5"><a href="#运行结果-5" class="headerlink" title="运行结果"></a>运行结果</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">16:57:14.459 [main] [requestID = ] INFO  com.xujz.LogDemo - log before put &apos;requestID&apos; to ThreadContext</span><br><span class="line">16:57:14.462 [main] [requestID = requestId-201905151503] INFO  com.xujz.LogDemo - log before handle request</span><br><span class="line">16:57:14.462 [main] [requestID = requestId-201905151503] INFO  com.xujz.LogDemo - log when handle request</span><br><span class="line">16:57:14.491 [main] [requestID = requestId-201905151503] INFO  com.xujz.LogDemo - log after handle request</span><br><span class="line">16:57:14.492 [pool-2-thread-1] [requestID = requestId-201905151503] INFO  com.xujz.LogDemo - log when run in a thread pool</span><br><span class="line">16:57:14.492 [main] [requestID = ] INFO  com.xujz.LogDemo - log after clear the ThreadContext</span><br></pre></td></tr></table></figure>
+<h3 id="误区"><a href="#误区" class="headerlink" title="误区"></a>误区</h3><p>下面的代码没有使用TTL增强Executor和Runnable, 但线程池内部的日志仍然能够获取到requestID, 这是因为在引入了<a href="https://github.com/oldratlee/log4j2-ttl-thread-context-map" target="_blank" rel="noopener">log4j2-ttl-thread-context-map</a>组件后, ThreadContext使用的ThreadContextMap已经被指定为TtlThreadContextMap了, 而TtlThreadContextMap是继承自InheritableThreadLocal的, 由于此时线程池创建的线程的父线程是主线程, 所以主线程的ThreadLocal能够被线程池内的线程继承, 所以会出现线程池线程在记录日志时仍旧能够获得requestID的情况, 在此提供一种验证的方法, 启动循环重复执行handleRequest(), 并且每次都指定不同的requestID, 当线程池内线程出现复用情况后便会出现日志记录的requestID不变的情况.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LogDemo</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Logger logger = LoggerFactory.getLogger(LogDemo.class);</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Executor executor = Executors.newFixedThreadPool(<span class="number">10</span>);</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        LogDemo logDemo = <span class="keyword">new</span> LogDemo();</span><br><span class="line"></span><br><span class="line">        logger.info(<span class="string">"log before put 'requestID' to ThreadContext"</span>);</span><br><span class="line">        <span class="keyword">try</span> (<span class="keyword">final</span> CloseableThreadContext.Instance ctc</span><br><span class="line">                = CloseableThreadContext.put(<span class="string">"requestID"</span>, <span class="string">"requestId-201905151503"</span>)) &#123;</span><br><span class="line">            logger.info(<span class="string">"log before handle request"</span>);</span><br><span class="line">            logDemo.handleRequest();</span><br><span class="line">            logger.info(<span class="string">"log after handle request"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        logger.info(<span class="string">"log after clear the ThreadContext"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleRequest</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        logger.info(<span class="string">"log when handle request"</span>);</span><br><span class="line">        executor.execute(() -&gt; logger.info(<span class="string">"log when run in a thread pool"</span>));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="相关源码解析"><a href="#相关源码解析" class="headerlink" title="相关源码解析"></a>相关源码解析</h2><h3 id="log4j2-ThreadContext"><a href="#log4j2-ThreadContext" class="headerlink" title="log4j2-ThreadContext"></a>log4j2-ThreadContext</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    contextMap = <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">final</span> PropertiesUtil managerProps = PropertiesUtil.getProperties();</span><br><span class="line">    disableAll = managerProps.getBooleanProperty(DISABLE_ALL);</span><br><span class="line">    useStack = !(managerProps.getBooleanProperty(DISABLE_STACK) || disableAll);</span><br><span class="line">    useMap = !(managerProps.getBooleanProperty(DISABLE_MAP) || disableAll);</span><br><span class="line"></span><br><span class="line">    contextStack = <span class="keyword">new</span> DefaultThreadContextStack(useStack);</span><br><span class="line">    <span class="keyword">if</span> (!useMap) &#123;</span><br><span class="line">        contextMap = <span class="keyword">new</span> NoOpThreadContextMap();</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123; <span class="comment">// 若启用ThreadContextMap则通过ThreadContextMapFactory创建ThreadContextMap</span></span><br><span class="line">        contextMap = ThreadContextMapFactory.createThreadContextMap();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (contextMap <span class="keyword">instanceof</span> ReadOnlyThreadContextMap) &#123;</span><br><span class="line">        readOnlyContextMap = (ReadOnlyThreadContextMap) contextMap;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Puts a context value (the &lt;code&gt;value&lt;/code&gt; parameter) as identified with the &lt;code&gt;key&lt;/code&gt; parameter into</span></span><br><span class="line"><span class="comment"> * the current thread's context map.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * &lt;p&gt;</span></span><br><span class="line"><span class="comment"> * If the current thread does not have a context map it is created as a side effect.</span></span><br><span class="line"><span class="comment"> * &lt;/p&gt;</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> key The key name.</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> value The key value.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">put</span><span class="params">(<span class="keyword">final</span> String key, <span class="keyword">final</span> String value)</span> </span>&#123;</span><br><span class="line">    contextMap.put(key, value); <span class="comment">// 将键值对添加进ThreadContextMap</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="log4j2-ThreadContextMap"><a href="#log4j2-ThreadContextMap" class="headerlink" title="log4j2-ThreadContextMap"></a>log4j2-ThreadContextMap</h3><p>由于<code>ThreadContextMap</code>的实现类基本功能都是存储线程上下文信息, 所以选取<code>DefaultThreadContextMap</code>分析</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">boolean</span> useMap;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> ThreadLocal&lt;Map&lt;String, String&gt;&gt; localMap; <span class="comment">// localMap用来存储对应线程的上下文信息</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">DefaultThreadContextMap</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>(<span class="keyword">true</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">DefaultThreadContextMap</span><span class="params">(<span class="keyword">final</span> <span class="keyword">boolean</span> useMap)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.useMap = useMap;</span><br><span class="line">    <span class="keyword">this</span>.localMap = createThreadLocalMap(useMap);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// LOG4J2-479: by default, use a plain ThreadLocal, only use InheritableThreadLocal if configured.</span></span><br><span class="line"><span class="comment">// (This method is package protected for JUnit tests.)</span></span><br><span class="line"><span class="keyword">static</span> ThreadLocal&lt;Map&lt;String, String&gt;&gt; createThreadLocalMap(<span class="keyword">final</span> <span class="keyword">boolean</span> isMapEnabled) &#123;</span><br><span class="line">    <span class="keyword">final</span> PropertiesUtil managerProps = PropertiesUtil.getProperties();</span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">boolean</span> inheritable = managerProps.getBooleanProperty(INHERITABLE_MAP);</span><br><span class="line">    <span class="keyword">if</span> (inheritable) &#123; <span class="comment">// 若log4j2开启ThreadContextMap的可继承选项, 则子线程会直接拷贝父线程的上下文</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> InheritableThreadLocal&lt;Map&lt;String, String&gt;&gt;() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">protected</span> Map&lt;String, String&gt; <span class="title">childValue</span><span class="params">(<span class="keyword">final</span> Map&lt;String, String&gt; parentValue)</span> </span>&#123;</span><br><span class="line">                <span class="keyword">return</span> parentValue != <span class="keyword">null</span> &amp;&amp; isMapEnabled <span class="comment">//</span></span><br><span class="line">                    ? Collections.unmodifiableMap(<span class="keyword">new</span> HashMap&lt;&gt;(parentValue)) <span class="comment">//</span></span><br><span class="line">                    : <span class="keyword">null</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// if not inheritable, return plain ThreadLocal with null as initial value</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> ThreadLocal&lt;&gt;();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">put</span><span class="params">(<span class="keyword">final</span> String key, <span class="keyword">final</span> String value)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!useMap) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    Map&lt;String, String&gt; map = localMap.get();</span><br><span class="line">    map = map == <span class="keyword">null</span> ? <span class="keyword">new</span> HashMap&lt;String, String&gt;(<span class="number">1</span>) : <span class="keyword">new</span> HashMap&lt;&gt;(map);</span><br><span class="line">    map.put(key, value); <span class="comment">//每次插入新的键值对都会重新生成一个Map并进行写入</span></span><br><span class="line">    localMap.set(Collections.unmodifiableMap(map)); <span class="comment">// 插入完成后再次生成一个不可修改的Map并替换原来的localMap, 保证该上下文信息一直处于不可变的状态</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="TransmittableThreadLocal"><a href="#TransmittableThreadLocal" class="headerlink" title="TransmittableThreadLocal"></a>TransmittableThreadLocal</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TransmittableThreadLocal</span>&lt;<span class="title">T</span>&gt; <span class="keyword">extends</span> <span class="title">InheritableThreadLocal</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> T <span class="title">get</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        T value = <span class="keyword">super</span>.get();</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">null</span> != value) addValue();</span><br><span class="line">        <span class="keyword">return</span> value;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">set</span><span class="params">(T value)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.set(value);</span><br><span class="line">        <span class="comment">// may set null to remove value</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">null</span> == value) removeValue();</span><br><span class="line">        <span class="keyword">else</span> addValue();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// Note about holder:</span></span><br><span class="line">    <span class="comment">// 1. The value of holder is type Map&lt;TransmittableThreadLocal&lt;?&gt;, ?&gt; (WeakHashMap implementation),</span></span><br><span class="line">    <span class="comment">//    but it is used as *set*.</span></span><br><span class="line">    <span class="comment">// 2. WeakHashMap support null value.</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// holder为静态变量, 用来存放每个线程的TransmittableThreadLocal集合, 该变量与Transmitter结合</span></span><br><span class="line">    <span class="comment">// 便是TransmittableThreadLocal能够跨线程传递ThreadLocal的关键</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> InheritableThreadLocal&lt;Map&lt;TransmittableThreadLocal&lt;?&gt;, ?&gt;&gt; holder =</span><br><span class="line">            <span class="keyword">new</span> InheritableThreadLocal&lt;Map&lt;TransmittableThreadLocal&lt;?&gt;, ?&gt;&gt;() &#123;</span><br><span class="line">                <span class="meta">@Override</span></span><br><span class="line">                <span class="keyword">protected</span> Map&lt;TransmittableThreadLocal&lt;?&gt;, ?&gt; initialValue() &#123;</span><br><span class="line">                    <span class="keyword">return</span> <span class="keyword">new</span> WeakHashMap&lt;TransmittableThreadLocal&lt;?&gt;, Object&gt;();</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="meta">@Override</span></span><br><span class="line">                <span class="keyword">protected</span> Map&lt;TransmittableThreadLocal&lt;?&gt;, ?&gt; childValue(Map&lt;TransmittableThreadLocal&lt;?&gt;, ?&gt; parentValue) &#123;</span><br><span class="line">                    <span class="keyword">return</span> <span class="keyword">new</span> WeakHashMap&lt;TransmittableThreadLocal&lt;?&gt;, Object&gt;(parentValue);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">addValue</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (!holder.get().containsKey(<span class="keyword">this</span>)) &#123;</span><br><span class="line">            holder.get().put(<span class="keyword">this</span>, <span class="keyword">null</span>); <span class="comment">// WeakHashMap supports null value.</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">removeValue</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        holder.get().remove(<span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Transmitter</span> </span>&#123;</span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * Capture all &#123;<span class="doctag">@link</span> TransmittableThreadLocal&#125; values in current thread.</span></span><br><span class="line"><span class="comment">         *</span></span><br><span class="line"><span class="comment">         * 获取当前线程持有的TransmittableThreadLocal集合.</span></span><br><span class="line"><span class="comment">         *</span></span><br><span class="line"><span class="comment">         * <span class="doctag">@return</span> the captured &#123;<span class="doctag">@link</span> TransmittableThreadLocal&#125; values</span></span><br><span class="line"><span class="comment">         * <span class="doctag">@since</span> 2.3.0</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        <span class="meta">@Nonnull</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title">capture</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            Map&lt;TransmittableThreadLocal&lt;?&gt;, Object&gt; captured = <span class="keyword">new</span> HashMap&lt;TransmittableThreadLocal&lt;?&gt;, Object&gt;();</span><br><span class="line">            <span class="keyword">for</span> (TransmittableThreadLocal&lt;?&gt; threadLocal : holder.get().keySet()) &#123;</span><br><span class="line">                captured.put(threadLocal, threadLocal.copyValue());</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> captured;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * Replay the captured &#123;<span class="doctag">@link</span> TransmittableThreadLocal&#125; values from &#123;<span class="doctag">@link</span> #capture()&#125;,</span></span><br><span class="line"><span class="comment">         * and return the backup &#123;<span class="doctag">@link</span> TransmittableThreadLocal&#125; values in current thread before replay.</span></span><br><span class="line"><span class="comment">         *</span></span><br><span class="line"><span class="comment">         * 重放由capture()捕获到所有TransmittableThreadLocal集合, 并备份当前线程的TransmittableThreadLocal集合, 用于后续的还原.</span></span><br><span class="line"><span class="comment">         *</span></span><br><span class="line"><span class="comment">         * <span class="doctag">@param</span> captured captured &#123;<span class="doctag">@link</span> TransmittableThreadLocal&#125; values from other thread from &#123;<span class="doctag">@link</span> #capture()&#125;</span></span><br><span class="line"><span class="comment">         * <span class="doctag">@return</span> the backup &#123;<span class="doctag">@link</span> TransmittableThreadLocal&#125; values before replay</span></span><br><span class="line"><span class="comment">         * <span class="doctag">@see</span> #capture()</span></span><br><span class="line"><span class="comment">         * <span class="doctag">@since</span> 2.3.0</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        <span class="meta">@Nonnull</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title">replay</span><span class="params">(@Nonnull Object captured)</span> </span>&#123;</span><br><span class="line">            <span class="meta">@SuppressWarnings</span>(<span class="string">"unchecked"</span>)</span><br><span class="line">            Map&lt;TransmittableThreadLocal&lt;?&gt;, Object&gt; capturedMap = (Map&lt;TransmittableThreadLocal&lt;?&gt;, Object&gt;) captured;</span><br><span class="line">            Map&lt;TransmittableThreadLocal&lt;?&gt;, Object&gt; backup = <span class="keyword">new</span> HashMap&lt;TransmittableThreadLocal&lt;?&gt;, Object&gt;();</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> (Iterator&lt;? extends Map.Entry&lt;TransmittableThreadLocal&lt;?&gt;, ?&gt;&gt; iterator = holder.get().entrySet().iterator();</span><br><span class="line">                 iterator.hasNext(); ) &#123;</span><br><span class="line">                Map.Entry&lt;TransmittableThreadLocal&lt;?&gt;, ?&gt; next = iterator.next();</span><br><span class="line">                TransmittableThreadLocal&lt;?&gt; threadLocal = next.getKey();</span><br><span class="line"></span><br><span class="line">                <span class="comment">// backup</span></span><br><span class="line">                backup.put(threadLocal, threadLocal.get());</span><br><span class="line"></span><br><span class="line">                <span class="comment">// clear the TTL values that is not in captured</span></span><br><span class="line">                <span class="comment">// avoid the extra TTL values after replay when run task</span></span><br><span class="line">                <span class="keyword">if</span> (!capturedMap.containsKey(threadLocal)) &#123;</span><br><span class="line">                    iterator.remove();</span><br><span class="line">                    threadLocal.superRemove();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// set TTL values to captured</span></span><br><span class="line">            setTtlValuesTo(capturedMap);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// call beforeExecute callback</span></span><br><span class="line">            doExecuteCallback(<span class="keyword">true</span>);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">return</span> backup;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * Restore the backup &#123;<span class="doctag">@link</span> TransmittableThreadLocal&#125; values from &#123;<span class="doctag">@link</span> #replay(Object)&#125;/&#123;<span class="doctag">@link</span> #clear()&#125;.</span></span><br><span class="line"><span class="comment">         *</span></span><br><span class="line"><span class="comment">         * 把重放时获得的TransmittableThreadLocal集合备份恢复到原线程上, 保证从任务运行时环境退出后线程的TransmittableThreadLocal集合恢复为原样.</span></span><br><span class="line"><span class="comment">         *</span></span><br><span class="line"><span class="comment">         * <span class="doctag">@param</span> backup the backup &#123;<span class="doctag">@link</span> TransmittableThreadLocal&#125; values from &#123;<span class="doctag">@link</span> #replay(Object)&#125;/&#123;<span class="doctag">@link</span> #clear()&#125;</span></span><br><span class="line"><span class="comment">         * <span class="doctag">@see</span> #replay(Object)</span></span><br><span class="line"><span class="comment">         * <span class="doctag">@see</span> #clear()</span></span><br><span class="line"><span class="comment">         * <span class="doctag">@since</span> 2.3.0</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">restore</span><span class="params">(@Nonnull Object backup)</span> </span>&#123;</span><br><span class="line">            <span class="meta">@SuppressWarnings</span>(<span class="string">"unchecked"</span>)</span><br><span class="line">            Map&lt;TransmittableThreadLocal&lt;?&gt;, Object&gt; backupMap = (Map&lt;TransmittableThreadLocal&lt;?&gt;, Object&gt;) backup;</span><br><span class="line">            <span class="comment">// call afterExecute callback</span></span><br><span class="line">            doExecuteCallback(<span class="keyword">false</span>);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> (Iterator&lt;? extends Map.Entry&lt;TransmittableThreadLocal&lt;?&gt;, ?&gt;&gt; iterator = holder.get().entrySet().iterator();</span><br><span class="line">                 iterator.hasNext(); ) &#123;</span><br><span class="line">                Map.Entry&lt;TransmittableThreadLocal&lt;?&gt;, ?&gt; next = iterator.next();</span><br><span class="line">                TransmittableThreadLocal&lt;?&gt; threadLocal = next.getKey();</span><br><span class="line"></span><br><span class="line">                <span class="comment">// clear the TTL values that is not in backup</span></span><br><span class="line">                <span class="comment">// avoid the extra TTL values after restore</span></span><br><span class="line">                <span class="keyword">if</span> (!backupMap.containsKey(threadLocal)) &#123;</span><br><span class="line">                    iterator.remove();</span><br><span class="line">                    threadLocal.superRemove();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// restore TTL values</span></span><br><span class="line">            setTtlValuesTo(backupMap);</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="TtlRunnable"><a href="#TtlRunnable" class="headerlink" title="TtlRunnable"></a>TtlRunnable</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">TtlRunnable</span> <span class="keyword">implements</span> <span class="title">Runnable</span>, <span class="title">TtlEnhanced</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> AtomicReference&lt;Object&gt; capturedRef;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Runnable runnable;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">boolean</span> releaseTtlValueReferenceAfterRun;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">TtlRunnable</span><span class="params">(@Nonnull Runnable runnable, <span class="keyword">boolean</span> releaseTtlValueReferenceAfterRun)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 保存待传入的上下文信息</span></span><br><span class="line">        <span class="keyword">this</span>.capturedRef = <span class="keyword">new</span> AtomicReference&lt;Object&gt;(capture());</span><br><span class="line">        <span class="comment">// 原Runnable</span></span><br><span class="line">        <span class="keyword">this</span>.runnable = runnable;</span><br><span class="line">        <span class="keyword">this</span>.releaseTtlValueReferenceAfterRun = releaseTtlValueReferenceAfterRun;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * wrap method &#123;<span class="doctag">@link</span> Runnable#run()&#125;.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Object captured = capturedRef.get();</span><br><span class="line">        <span class="keyword">if</span> (captured == <span class="keyword">null</span> || releaseTtlValueReferenceAfterRun &amp;&amp; !capturedRef.compareAndSet(captured, <span class="keyword">null</span>)) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"TTL value reference is released after run!"</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// captured为创建该Runnable的线程的TransmittableThreadLocal集合, 即为任务创建线程的上下文信息, 此时通过replay()将其传入任务执行线程, 并返回任务执行线程的TransmittableThreadLocal集合备份</span></span><br><span class="line">        Object backup = replay(captured);</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 任务执行时, 此时获取到的TransmittableThreadLocal集合便是任务创建线程的上下文信息</span></span><br><span class="line">            runnable.run();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="comment">// 任务执行结束后, 恢复任务执行线程的上下文信息</span></span><br><span class="line">            restore(backup);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Log4j2/" rel="tag"># Log4j2</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/11/12/记一次服务CPU占用100%问题的定位/" rel="next" title="The 100% CPU usage caused by frequent GC">
+                <i class="fa fa-chevron-left"></i> The 100% CPU usage caused by frequent GC
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Evan Xu</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">21</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#使用Log4j2追踪一次调用的所有日志"><span class="nav-number">1.</span> <span class="nav-text">使用Log4j2追踪一次调用的所有日志</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ThreadContext"><span class="nav-number">1.1.</span> <span class="nav-text">ThreadContext</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Fish-Tagging"><span class="nav-number">1.1.0.1.</span> <span class="nav-text">Fish Tagging</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Implementation-details"><span class="nav-number">1.1.0.2.</span> <span class="nav-text">Implementation details</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#工程配置"><span class="nav-number">1.2.</span> <span class="nav-text">工程配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#添加依赖"><span class="nav-number">1.2.1.</span> <span class="nav-text">添加依赖</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#log4j2-xml配置文件"><span class="nav-number">1.2.2.</span> <span class="nav-text">log4j2.xml配置文件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ThreadContext的使用"><span class="nav-number">1.3.</span> <span class="nav-text">ThreadContext的使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#代码"><span class="nav-number">1.3.1.</span> <span class="nav-text">代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#运行结果"><span class="nav-number">1.3.2.</span> <span class="nav-text">运行结果</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CloseableThreadContext的使用"><span class="nav-number">1.4.</span> <span class="nav-text">CloseableThreadContext的使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#代码-1"><span class="nav-number">1.4.1.</span> <span class="nav-text">代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#运行结果-1"><span class="nav-number">1.4.2.</span> <span class="nav-text">运行结果</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用线程池情况下的标记添加"><span class="nav-number">1.5.</span> <span class="nav-text">使用线程池情况下的标记添加</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#扩展Runnable"><span class="nav-number">1.5.1.</span> <span class="nav-text">扩展Runnable</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用Runnable提交任务时"><span class="nav-number">1.5.2.</span> <span class="nav-text">使用Runnable提交任务时</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#运行结果-2"><span class="nav-number">1.5.3.</span> <span class="nav-text">运行结果</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用ThreadContextRunnable提交任务时"><span class="nav-number">1.5.4.</span> <span class="nav-text">使用ThreadContextRunnable提交任务时</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#运行结果-3"><span class="nav-number">1.5.5.</span> <span class="nav-text">运行结果</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用transmittable-thread-local与log4j2-ttl-thread-context-map完成标记添加"><span class="nav-number">1.6.</span> <span class="nav-text">使用transmittable-thread-local与log4j2-ttl-thread-context-map完成标记添加</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#添加依赖-1"><span class="nav-number">1.6.1.</span> <span class="nav-text">添加依赖</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用TtlRunnable提交任务"><span class="nav-number">1.6.2.</span> <span class="nav-text">使用TtlRunnable提交任务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#运行结果-4"><span class="nav-number">1.6.3.</span> <span class="nav-text">运行结果</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用TtlExecutor线程池处理任务"><span class="nav-number">1.6.4.</span> <span class="nav-text">使用TtlExecutor线程池处理任务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#运行结果-5"><span class="nav-number">1.6.5.</span> <span class="nav-text">运行结果</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#误区"><span class="nav-number">1.6.6.</span> <span class="nav-text">误区</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#相关源码解析"><span class="nav-number">1.7.</span> <span class="nav-text">相关源码解析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#log4j2-ThreadContext"><span class="nav-number">1.7.1.</span> <span class="nav-text">log4j2-ThreadContext</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#log4j2-ThreadContextMap"><span class="nav-number">1.7.2.</span> <span class="nav-text">log4j2-ThreadContextMap</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TransmittableThreadLocal"><span class="nav-number">1.7.3.</span> <span class="nav-text">TransmittableThreadLocal</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TtlRunnable"><span class="nav-number">1.7.4.</span> <span class="nav-text">TtlRunnable</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Evan Xu</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
